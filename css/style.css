@@ -27,14 +27,39 @@
     height: 100%;
     border-left: 1px solid #226DDD;
 }
+/* 左边CSS*/
 .box-china{
     width: 90%;
-    height: 200px;
+    height: 140px;
     margin: auto;
     background: url(../images/border_bg01.png) top left no-repeat;
     background-size: 100% 100%;
 }
 .box-china>.title{
-    text-align: center;
+    height: 40px;
     background: url(../images/title_bg01.png) center center no-repeat;
+    text-align: center;
+    padding-top: 20px;
+    color: #226DDD;
+
+}
+.box-china p{
+    font-size: 40px;
+    text-align: center;
+    color: white;
+}
+/* 中间边CSS*/
+.box-center>.sys-title{
+    width: 100%;
+    height: 60px;
+    background: url(../images/title_border.png) bottom center no-repeat;
+}
+.box-center .title{
+    width: 100%;
+    height: 40px;
+    font-size: 30px;
+    text-align: center;
+    color: white;
+    padding-top: 10px;
+    font-weight: 900;
 }

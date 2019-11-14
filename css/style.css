@@ -27,6 +27,20 @@
     height: 100%;
     border-left: 1px solid #226DDD;
 }
+.tooltip{
+    position: absolute;
+    width: 120px;
+    height: auto;
+    pointer-events: none; 
+    border-radius:5px;
+    
+    background-color:rgba(0,0,0,0.3);
+    color: white;
+    padding: 5px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 20;
+}
 /* 左边CSS*/
 .box-china{
     width: 90%;
@@ -63,3 +77,4 @@
     padding-top: 10px;
     font-weight: 900;
 }
+/* 右边CSS*/

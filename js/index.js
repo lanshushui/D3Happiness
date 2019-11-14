@@ -48,6 +48,33 @@ function start(){
 */
 //画地图函数
 function drawMap(){
+    //初始化sales变量
+    for(var j = 0; j < mapjson.features.length; ++j){
+        mapjson.features[j].properties.happinessScore =parseFloat(0);
+    }
+    for (var i = 0; i < csv2015.length; ++i) {
+        //获取国家名
+        var country = csv2015[i].Country;
+        //获取对应的幸福分数
+        var happinessScore = csv2015[i].HappinessScore;
+        //在GeoJSON中找到相应的州
+        for (var j = 0; j < mapjson.features.length; ++j) {
+            var jsonCountry = mapjson.features[j].properties.name;
+            if (country == jsonCountry) {
+                //把幸福数据值复制到json中
+                mapjson.features[j].properties.happinessScore = happinessScore;
+                //停止循环JSON数据
+                break;
+            }
+        }
+    }
+     //颜色选择
+     var color = d3.scaleLinear()
+     .range(["rgb(0,255,255)","rgb(255,170,0)"])
+     .domain([
+        d3.min(mapjson.features, function(d) { return parseFloat(d.properties.happinessScore); }),
+        d3.max(mapjson.features, function(d) { return parseFloat(d.properties.happinessScore); })
+        ]);
     //绑定数据并为每一个GeoJSON feature创建一个路径
     //SVG的宽度和高度
     var w = 600;
@@ -76,13 +103,34 @@ function drawMap(){
     .append("path")
     .attr("d", path)
     .attr("fill", function(d) {
-             return "#ccc";
+              //根据销量值设置颜色
+            var value = d.properties.happinessScore;
+            if (value) {
+                return color(value);
+            } else {
+                return "#ccc";
+            }
         })
-    .on("mouseover", function(d,i) {  
-      d3.select(this).attr('fill', 'rgba(2,2,139,0.61)');
+    .on("mousemove", function(d,i) { 
+      if(d.properties.happinessScore==0) return;
+
+      d3.select(".tooltip").style('display','block');
+      d3.select(".tooltip").html('国家名： '+d.properties.name+'<br/>'+'幸福分数为'+d.properties.happinessScore);
+
+      d3.select(this).attr('fill', 'rgba(255,99,71)');
+      d3.select(".tooltip").style("left",(d3.event.pageX)+"px")
+      .style("top",(d3.event.pageY)+"px")
     })
     .on("mouseout",function(d,i){
-      d3.select(this).attr('fill', 'rgba(128,124,139,0.61');
+           var value = d.properties.happinessScore;
+            if (value) {
+                d3.select(this).attr('fill', color(value));
+            } else {
+            
+                d3.select(this).attr('fill', "#ccc");
+            }
+
+            d3.select(".tooltip").style('display','none');
     })
     .attr('stroke', 'rgba(255,255,255,1)')
     .attr('stroke-width', 1);

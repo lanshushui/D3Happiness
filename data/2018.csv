@@ -1,4 +1,4 @@
-Rank,Country,Score,GDP_Per_Capita,Social_Support,Healthy_Life_Expectancy,Freedom_To_Make_Life_Choices,Generosity,Perceptions_Of_Corruption,Residual
+HappinessRank,Country,HappinessScore,Economy,Social_Support,Health,Freedom,Generosity,Perceptions_Of_Corruption,DystopiaResidual
 1,Finland,7.632,1.305,1.592,0.874,0.681,0.192,0.393,2.988
 2,Norway,7.594,1.456,1.582,0.861,0.686,0.286,0.34,2.723
 3,Denmark,7.555,1.351,1.59,0.868,0.683,0.284,0.408,2.779

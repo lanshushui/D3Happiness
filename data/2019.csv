@@ -1,4 +1,4 @@
-Country (region),Ladder,SD of Ladder,Positive affect,Negative affect,Social support,Freedom,Corruption,Generosity,"Log of GDP
+Country,HappinessRank,SD of Ladder,Positive affect,Negative affect,Social support,Freedom,Corruption,Generosity,"Log of GDP
 per capita","Healthy life
 expectancy"
 Finland,1,4,41,10,2,5,4,47,22,27

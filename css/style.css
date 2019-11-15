@@ -4,7 +4,7 @@
 }
 .container {
     width: 100%;
-    height: 600px;
+    height: 900px;
     background: url(../images/index_bg.png) left top no-repeat;
     background-size: 100% 100%;
     display: flex; 
@@ -76,6 +76,17 @@
 .china-radar{
     margin: 10px 0 0 10px;
 }
+.box-linechart>.title{
+    width: 96%;
+    height: 40px;
+    line-height: 40px;
+    background: url(../images/box_title.png) top left no-repeat;
+    background-size: 100% 100%;
+    text-align: center;
+    margin: auto;   
+    color: white;
+}
+
 /* 中间边CSS*/
 .box-center>.sys-title{
     width: 100%;

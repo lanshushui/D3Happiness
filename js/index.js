@@ -42,15 +42,55 @@
     drawMap();
     initChinaRank();
     drawChinaRadar();
-  }
+    drawLineChart();
+    }
   /*
    
    上述JS代码是加载数据，start函数开始可视化操作
 
    */
+  function drawLineChart(){
+     var data=[];
+
+     var chinadata;
+    
+     var o = {};
+     chinadata=csv2015.filter( function(value, key) {return value.Country == 'China'; })[0];
+     o['x']=2015;
+     o['y']=chinadata['HappinessRank'];
+     data.push(o);
+
+     var o = {};
+     chinadata=csv2016.filter( function(value, key) {return value.Country == 'China'; })[0];
+     o['x']=2016;
+     o['y']=chinadata['HappinessRank'];
+     data.push(o);
+
+     var o = {};
+     chinadata=csv2017.filter( function(value, key) {return value.Country == 'China'; })[0];
+     o['x']=2017;
+     o['y']=chinadata['HappinessRank'];
+     data.push(o);
+
+     var o = {};
+     chinadata=csv2018.filter( function(value, key) {return value.Country == 'China'; })[0];
+     o['x']=2018;
+     o['y']=chinadata['HappinessRank'];
+     data.push(o);
+
+     var o = {};
+     chinadata=csv2019.filter( function(value, key) {return value.Country == 'China'; })[0];
+     o['x']=2019;
+     o['y']=chinadata['HappinessRank'];
+     data.push(o);
+
+     //上面代码初始化数据
+
+
+   }
 
    function drawChinaRadar(){
-      var radarconfig={
+    var radarconfig={
         width: 320,
         height: 320,
         fill_opacity: 0.1,
@@ -60,7 +100,7 @@
         maxR: 120,
         strokeWidth: 2, 
         angleSlice : Math.PI * 2 / 5
-      }
+        }
     var allAxis=['HappinessScore','Health','Freedom','Trust','Generosity'];
 
     ////创造数据
@@ -72,10 +112,10 @@
     for (let i in chinadata) {
       if(!allAxis.includes(i)) continue; 
       let o = {};
-        o['axis'] = chinadata[i]; //即添加了key值也赋了value值 o[i] 相当于o.name 此时i为变量
-        arr.push(o);
+      o['axis'] = chinadata[i]; //即添加了key值也赋了value值 o[i] 相当于o.name 此时i为变量
+      arr.push(o);
       } 
-      data.push(arr);
+    data.push(arr);
       
     //范围尺
     var rScale = d3.scaleLinear()
@@ -186,11 +226,10 @@
         let x=d[i].axis*radarconfig.maxR*Math.cos(radarconfig.angleSlice*i - Math.PI/2);
         let y=d[i].axis*(radarconfig.maxR)* Math.sin(radarconfig.angleSlice*i - Math.PI/2);
         path.lineTo(x, y);
-      }
-    }
+       }
+     }
     return path.toString();
-
-  })
+   })
   .style("fill", function(d,i) { return '#ff5555'; })
   .style("fill-opacity", 0.7);
   
@@ -262,7 +301,7 @@
       .append("path")
       .attr("d", path)
       .attr("fill", function(d) {
-                //根据销量值设置颜色
+                //根据快乐值设置颜色
                 var value = d.properties.happinessScore;
                 if (value) {
                   return color(value);

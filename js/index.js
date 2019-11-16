@@ -55,36 +55,106 @@
      var chinadata;
     
      var o = {};
+     o['x']=0;
+     o['y']=0;
+     data.push(o);
+
+     var o = {};
      chinadata=csv2015.filter( function(value, key) {return value.Country == 'China'; })[0];
      o['x']=2015;
-     o['y']=chinadata['HappinessRank'];
+     o['y']=chinadata['HappinessScore'];
      data.push(o);
 
      var o = {};
      chinadata=csv2016.filter( function(value, key) {return value.Country == 'China'; })[0];
      o['x']=2016;
-     o['y']=chinadata['HappinessRank'];
+     o['y']=chinadata['HappinessScore'];
      data.push(o);
 
      var o = {};
      chinadata=csv2017.filter( function(value, key) {return value.Country == 'China'; })[0];
      o['x']=2017;
-     o['y']=chinadata['HappinessRank'];
+     o['y']=chinadata['HappinessScore'];
      data.push(o);
 
      var o = {};
      chinadata=csv2018.filter( function(value, key) {return value.Country == 'China'; })[0];
      o['x']=2018;
-     o['y']=chinadata['HappinessRank'];
+     o['y']=chinadata['HappinessScore'];
      data.push(o);
 
-     var o = {};
-     chinadata=csv2019.filter( function(value, key) {return value.Country == 'China'; })[0];
-     o['x']=2019;
-     o['y']=chinadata['HappinessRank'];
-     data.push(o);
+  
 
      //上面代码初始化数据
+     //创造SVG
+    var width=320;
+    var height=320;
+    var svg = d3.select(".svg-linechart")
+    .append("svg")
+    .attr("width", width)
+    .attr("height",height)
+    .attr("class", "line-chart");
+
+
+    var xAxisScale = d3.scaleBand()
+        .range([0, (width-50)])
+        .domain(data.map(function(element) {return element.x}))
+        .paddingInner(1);
+
+    var yAxisScale = d3.scaleLinear()
+        .domain([10, 0])
+        .range([0,(height-50)]);  //设置输出范围     
+
+    var xAxis = d3.axisBottom()
+        .scale(xAxisScale);
+
+
+    var yAxis = d3.axisLeft()
+        .scale(yAxisScale);
+
+    svg.append("g")  // 分组（group）元素
+         .call(xAxis)  // 在g元素上利用call函数调用xAxis
+         .attr("class","axis")
+         .attr("transform","translate(" + 20+ "," + (height-20) +")") ;        
+
+        // 调用y轴
+    svg.append("g")  // 分组（group）元素
+         .call(yAxis)  // 在g元素上利用call函数调用xAxis
+         .attr("class","yxis")
+         .attr("transform","translate(" + 20+ "," + 30 +")") ;   
+
+
+  //曲线盒子
+    var g = svg.append("g")
+    .attr("class", "linecharWrapper");
+    //上面代码创建坐标轴，下面绘画曲线
+    g.append("path")
+      .attr("class", "linechartArea")
+      .attr("d", function(d,i) {
+      var x0=20;
+      var y0=height-20;
+
+      var yScale = d3.scaleLinear()
+        .domain([0, 10])
+        .range([0,(height-50)]);  
+      var xScale=xAxisScale;
+
+      var path = d3.path();
+      for(let i=1;i<data.length;i++){
+        if(i==1) {
+          let x=x0+xScale(data[i].x);
+          let y=y0-yScale(data[i].y);
+          path.moveTo(x, y);
+        } else{
+          let x=x0+xScale(data[i].x);
+          let y=y0-yScale(data[i].y);
+          path.lineTo(x, y);
+        }
+      }
+       return path.toString();
+    })
+    .style("fill", function(d,i) { return '#ff5555'; })
+    .style("fill-opacity", 0.7);
 
 
    }

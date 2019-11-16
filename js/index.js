@@ -43,12 +43,67 @@
     initChinaRank();
     drawChinaRadar();
     drawLineChart();
+    drawPie();
     }
   /*
    
    上述JS代码是加载数据，start函数开始可视化操作
 
    */
+  function drawPie(){
+    function Region(name,happiness){
+      this.name=name;
+      this.avgHappiness=parseFloat(happiness);
+      this.sum=1;
+      this.addCountry=function(tempHappiness){
+         this.avgHappiness=((this.avgHappiness*this.sum)+parseFloat(tempHappiness))/(this.sum+1);
+         this.sum+=1;
+      }
+    }
+    var data=[];
+    for(let i=0;i<csv2015.length;i++){
+        var country=csv2015[i];
+        var flag=false;
+        for(let j=0;j<data.length;j++){
+            if(data[j].name==country.Region){
+              data[j].addCountry(country.HappinessScore);
+              flag=true;
+              break;
+            }
+        }
+        if(!flag){
+            data.push(new Region(country.Region,country.HappinessScore));
+        }
+    }
+    //上面代码初始化数据
+    var width=200;
+    var height=200;
+    var svg = d3.select(".svg-pie")
+    .append("svg")
+    .attr("width", width)
+    .attr("height",height)
+    .attr("class", "pie")
+    ;
+
+    var piedata=data.map(function(element) {return element.avgHappiness;});
+    var colors=['#FAEBD7','#CD853F','#8EE5EE','#FFE4E1','#00BFFF','#C0FF3E','#FFF5EE','#FF7F24','#FFFF00','#7FFFD4'];
+    var arc = d3.arc()
+        .innerRadius(width/3)
+        .outerRadius(width/2);    
+    var arcs = svg.selectAll("g")
+      .data(d3.pie()(piedata))  // 经过转换后的数据
+      .enter()
+      .append("g")
+      .attr("class", "arc")
+      .attr("transform", "translate(" + (width/2) + "," + (height/2) + ")");  
+
+     arcs.append("path")
+     .attr("fill", function(d, i) {
+        return colors[i%colors.length];
+     })
+     .attr("d", arc);       
+
+  } 
   function drawLineChart(){
      var data=[];
 
@@ -155,7 +210,6 @@
     })
     .style("fill", function(d,i) { return '#ff5555'; })
     .style("fill-opacity", 0.7);
-
 
    }
 

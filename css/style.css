@@ -133,3 +133,19 @@
     letter-spacing: 2px;
 }
 /* 右边CSS*/
+.box-pie>.title{
+    width: 96%;
+    height: 40px;
+    line-height: 40px;
+    background: url(../images/box_title.png) top left no-repeat;
+    background-size: 100% 100%;
+    text-align: center;
+    margin: auto;   
+    margin-top: 10px;
+    color: white;
+}
+.pie{
+    margin:  auto;
+    margin-top: 20px;
+    display:  block;
+}

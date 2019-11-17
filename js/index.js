@@ -75,6 +75,10 @@
             data.push(new Region(country.Region,country.HappinessScore));
         }
     }
+    data.sort(function(val1,val2){
+        return val2.avgHappiness-val1.avgHappiness;
+    });
+    console.log(data);
     //上面代码初始化数据
     var width=200;
     var height=200;
@@ -90,6 +94,7 @@
     var arc = d3.arc()
         .innerRadius(width/3)
         .outerRadius(width/2);    
+    //显示圆饼    
     var arcs = svg.selectAll("g")
       .data(d3.pie()(piedata))  // 经过转换后的数据
       .enter()
@@ -101,7 +106,46 @@
      .attr("fill", function(d, i) {
         return colors[i%colors.length];
      })
-     .attr("d", arc);       
+     .attr("d", arc);   
+     //显示百分比文字
+     arcs.append("text")
+     .attr("transform", function(d) {
+
+           return "translate(" + arc.centroid(d) + ")";    // 弧中心坐标
+       })
+       .attr("text-anchor", "middle")
+       .attr("fill",'black') 
+       .style("font-size", "10px")   
+       .text(function(d,i) {
+        return (d.data/(d3.sum(piedata))*100).toFixed(1)+"%"; //显示地区文字
+    });    
+
+    divs=d3.select(".piecolortip").selectAll("div")
+    .data(data)
+    .enter()
+    .append("div")
+    .style("display","block")
+    ;
+
+    divs.append("div")
+    .style("width","14px")
+    .style("height","14px")
+    .style("display","inline-block")
+    .style("vertical-align","middle")
+    .style("background-color",function(d,i){
+      return colors[i];
+    });
+    divs.append("div")
+    .style("color","white")
+    .style("font-size", "10px") 
+    .style("display","inline-block")
+    .style("height","10px")
+    .style("text-align","center")
+    .style("line-height","10px")
+    .style("margin-left","20px")
+    .html(function(d,i){
+      return d.name;
+    }); 
 
   } 
   function drawLineChart(){

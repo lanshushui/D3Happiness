@@ -149,3 +149,19 @@
     margin-top: 20px;
     display:  block;
 }
+.box-bar>.title{
+    width: 96%;
+    height: 40px;
+    line-height: 40px;
+    background: url(../images/box_title.png) top left no-repeat;
+    background-size: 100% 100%;
+    text-align: center;
+    margin: auto;   
+    margin-top: 20px;
+    color: white;
+}
+
+
+.piecolortip{
+    margin: 20px 0 0 20px;
+}

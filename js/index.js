@@ -50,6 +50,104 @@
    上述JS代码是加载数据，start函数开始可视化操作
 
    */
+   //画条形图
+   function drawBar(regionName){
+    d3.select(".bar-chart").remove();
+    var data=[];
+    for(let i=0;i<csv2015.length;i++){
+      var temp=csv2015[i];
+      if(temp.Region==regionName){
+        data.push(temp);
+      }
+      if(data.length==10) {
+        break;
+      }
+    }
+    data.sort(function(val1,val2){
+        return val2.HappinessScore-val1.HappinessScore;
+    });
+    //生成对应数据
+    //生成svg
+    var width=300;
+    var height=data.length*35+30;
+    var svg = d3.select(".svg-bar")
+    .append("svg")
+    .attr("width", width+40)
+    .attr("height", height+40)
+    .attr("class", "bar-chart");
+
+    var xAxisScale = d3.scaleLinear()
+        .domain([0, 10])
+        .range([0,(width-50)]);  //设置输出范围 
+
+    var yAxisScale = d3.scaleBand()
+        .domain(data.map(function(element) {return element.Country}))
+        .range([0, (height)])
+        .paddingInner(1)
+        .paddingOuter(1);   
+
+    var xAxis = d3.axisTop()
+        .scale(xAxisScale);
+
+    var yAxis = d3.axisLeft()
+        .scale(yAxisScale);
+
+    svg.append("g")  // 分组（group）元素
+         .call(xAxis)  // 在g元素上利用call函数调用xAxis
+         .attr("class","axis")
+         .attr("transform","translate(" + 45+ "," + 30 +")") ;        
+
+        // 调用y轴
+    svg.append("g")  // 分组（group）元素
+         .call(yAxis)  // 在g元素上利用call函数调用xAxis
+         .attr("class","yxis")
+         .attr("transform","translate(" + 45+ "," + 30 +")") ;  
+
+    svg.select(".yxis")
+      .selectAll("text")
+      .attr("font-size","7")
+      .attr("fill","white")
+      .style("stroke-width","1"); 
+    svg.select(".axis")
+      .selectAll("text")
+      .attr("font-size","10")
+      .attr("fill","white")
+      .style("stroke-width","1");    
+    //上面生成坐标轴
+
+    var yScale = d3.scaleBand()
+        .domain(d3.range(data.length))
+        .range([0, height])
+        .paddingInner(1)
+        .paddingOuter(1);  
+
+     console.log(yScale);   
+    var barWrapper = svg.append("g")
+        .attr("class", "barWrapper");
+
+
+    barWrapper.selectAll("rect")       //选择了空集
+    .data(data)        //绑定dataSet
+    .enter()                  //返回enter部分
+    .append("rect")       //数据中每个值，添加p元素
+    .attr("fill",function (d,i) {
+        return "#ff0000";
+        }) //设置颜色
+    .attr("x",0)                            //设置矩形左上角X坐标
+    .attr("y",function (d,i) {
+        return yScale(i)+18;
+        })                            //设置矩形左上角Y坐标
+    .attr("width", function(d){
+        return xAxisScale(d.HappinessScore);       //设置每个条形的宽度
+    })
+    .attr("height", function(d){
+     return 20;//设置每个条形的高度
+    })
+    .attr("transform","translate(" + 46+ "," + 0 +")");
+
+  }
+   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   //画饼状图
   function drawPie(){
     function Region(name,happiness){
       this.name=name;
@@ -78,7 +176,7 @@
     data.sort(function(val1,val2){
         return val2.avgHappiness-val1.avgHappiness;
     });
-    console.log(data);
+   // console.log(data);
     //上面代码初始化数据
     var width=200;
     var height=200;
@@ -102,11 +200,24 @@
       .attr("class", "arc")
       .attr("transform", "translate(" + (width/2) + "," + (height/2) + ")");  
 
-     arcs.append("path")
+    arcs.append("path")
      .attr("fill", function(d, i) {
         return colors[i%colors.length];
      })
-     .attr("d", arc);   
+     .attr("d", arc)
+     
+     .on("mousemove", function(d,i) { 
+        d3.select("html").style("cursor","pointer");
+      })
+     .on("mouseout",function(d,i){
+        d3.select("html").style("cursor","default");
+      })
+     .on("click", function (d,i) {
+        //点击事件
+        drawBar(data[i].name);
+      });
+
+
      //显示百分比文字
      arcs.append("text")
      .attr("transform", function(d) {
@@ -116,6 +227,7 @@
        .attr("text-anchor", "middle")
        .attr("fill",'black') 
        .style("font-size", "10px")   
+       .style("pointer-events","none")
        .text(function(d,i) {
         return (d.data/(d3.sum(piedata))*100).toFixed(1)+"%"; //显示地区文字
     });    
@@ -148,6 +260,9 @@
     }); 
 
   } 
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  //画折线图
   function drawLineChart(){
      var data=[];
 
@@ -256,7 +371,8 @@
     .style("fill-opacity", 0.7);
 
    }
-
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   //画雷达
    function drawChinaRadar(){
     var radarconfig={
         width: 320,
@@ -412,7 +528,8 @@
             break;
           }
         }
-      }
+    }
+   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   
   //画地图函数
   function drawMap(){
       //初始化happinessScore变量
@@ -427,7 +544,7 @@
           //在GeoJSON中找到相应的州
           for (var j = 0; j < mapjson.features.length; ++j) {
             var jsonCountry = mapjson.features[j].properties.name;
-            if (country == jsonCountry) {
+            if (country == jsonCountry||(country=="United States"&&jsonCountry=="United States of America")) {
                   //把幸福数据值复制到json中
                   mapjson.features[j].properties.happinessScore = happinessScore;
                   //停止循环JSON数据

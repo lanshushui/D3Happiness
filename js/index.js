@@ -4,6 +4,7 @@
   var csv2018;
   var csv2019;
   var mapjson;
+  var csvname;
   loadData();
   function loadData(){
     d3.csv("data/2015.csv").then(function(data) {
@@ -25,19 +26,29 @@
     d3.csv("data/2019.csv").then(function(data) {
       csv2019=data;
       if(loadSuccess()) start();
-    });             
+    });  
+    d3.csv("data/name.csv").then(function(data) {
+      csvname=data;
+      if(loadSuccess()) start();
+    });                   
     d3.json("data/world-countries.json").then(function(json) {
      json.features= json.features.filter( function(value, key) {
           return value.properties.name != 'Antarctica'; //过滤南极洲
         });
      mapjson=json;
      if(loadSuccess()) start();
-   });   
+    });   
   }
   function loadSuccess(){
-    return csv2015!=null&&csv2016!=null&&csv2017!=null&&csv2018!=null&&csv2018!=null&&mapjson!=null;
+    return csv2015!=null&&csv2016!=null&&csv2017!=null&&csv2018!=null&&csv2018!=null&&mapjson!=null&&csvname!=null;
   }
-
+  function engToChinese(name){
+    for(let i=0;i<csvname.length;i++){
+      if(csvname[i].English==name){
+        return csvname[i].Chinese;
+      }
+    }
+  }
   function start(){
     drawMap();
     initChinaRank();
@@ -51,7 +62,10 @@
 
    */
    //画条形图
-   function drawBar(regionName){
+   /**
+
+   **/
+   function drawBar(regionName,color){
     d3.select(".bar-chart").remove();
     var data=[];
     for(let i=0;i<csv2015.length;i++){
@@ -72,7 +86,7 @@
     var height=data.length*35+30;
     var svg = d3.select(".svg-bar")
     .append("svg")
-    .attr("width", width+40)
+    .attr("width", "100%")
     .attr("height", height+40)
     .attr("class", "bar-chart");
 
@@ -131,7 +145,7 @@
     .enter()                  //返回enter部分
     .append("rect")       //数据中每个值，添加p元素
     .attr("fill",function (d,i) {
-        return "#ff0000";
+        return color;
         }) //设置颜色
     .attr("x",0)                            //设置矩形左上角X坐标
     .attr("y",function (d,i) {
@@ -143,7 +157,20 @@
     .attr("height", function(d){
      return 20;//设置每个条形的高度
     })
-    .attr("transform","translate(" + 46+ "," + 0 +")");
+    .attr("transform","translate(" + 46+ "," + 0 +")")
+    .on("mousemove", function(d,i) { 
+
+        d3.select(".tooltip").style('display','block');
+        d3.select(".tooltip").html('国家名： '+d.Country+'<br/>'+'幸福分数为'+d.HappinessScore);
+
+        d3.select(this).attr('fill', 'rgba(255,99,71)');
+        d3.select(".tooltip").style("left",(d3.event.pageX)+"px")
+        .style("top",(d3.event.pageY)+"px")
+      })
+    .on("mouseout",function(d,i){
+      d3.select(this).attr('fill', color);
+      d3.select(".tooltip").style('display','none');
+    });    
 
   }
    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,7 +229,7 @@
 
     arcs.append("path")
      .attr("fill", function(d, i) {
-        return colors[i%colors.length];
+        return colors[i];
      })
      .attr("d", arc)
      
@@ -214,7 +241,7 @@
       })
      .on("click", function (d,i) {
         //点击事件
-        drawBar(data[i].name);
+        drawBar(data[i].name,colors[i]);
       });
 
 

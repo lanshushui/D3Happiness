@@ -122,7 +122,7 @@
     bottom: 26px;
     position: absolute;
 }
-.color-tip{
+.global-map .color-tip{
     left: 32px;
     bottom: 0px;
     position: absolute;
@@ -131,6 +131,12 @@
     font-weight: 20;
     text-align: center;
     letter-spacing: 2px;
+}
+.svg-scatter text,.svg-scatter path{
+    stroke: white;
+}
+.svg-scatter line{
+    stroke: white;
 }
 /* 右边CSS*/
 .box-pie>.title{

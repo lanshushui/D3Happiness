@@ -1,57 +1,88 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<meta charset="utf-8">
-	<link rel="stylesheet" href="css/style.css">
-	
-	<title>全球幸福数据-可视化系统</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style1.css">
+    <title>全球幸福数据-可视化系统</title>
 </head>
+
 <body>
-	<dvi class="container">
-		<div class="box-left"> <!-- 左边区域--> 
-			<div class="box-china"> <!-- 中国排名区域-->
-				<div class="title">中国幸福排名</div>
-				<p></p>
-			</div>
-			<div class="box-radar"><!-- 中国雷达区域-->
-				<div class="title">影响中国幸福指数的各项数据</div>
-				<div class="svg-radar"></div>
-			</div>
-			<div class="box-linechart"><!-- 中国幸福数据曲线区域-->
-				<div class="title">中国幸福分数变化</div>
-				<div class="svg-linechart"></div>
-			</div>
-		</div>
-		<div class="box-center"><!-- 中间区域--> 
-			<div class="sys-title"> <!-- 主标题-->
-				<div class="title">全球幸福数据可视化系统</div>
-			</div>
-			<div class="global-map"><!-- 地图区域-->
-				<div class="mapcolortip"></div>
-				<p class="color-tip">1-10分的幸福分数</p>
-			</div>
-			<div class="box-scatter" style="margin-top: 30px;"><!-- 散点图区域-->
-				<div class="color-tip"></div>
-				<div class="svg-scatterWrapper"></div>
-			</div>
-		</div>
-		<div class="box-right"><!-- 右边区域--> 
-			<div class="box-pie"><!-- 中国幸福数据曲线区域-->
-				<div class="title">区域幸福分数占比</div>
-				<div class="svg-pie"></div>
-				<div class="piecolortip"></div>
-			</div>
-			<div class="box-bar"><!-- 中国幸福数据曲线区域-->
-				<div class="title">部分国家幸福数据对比</div>
-				<div class="svg-bar"></div>
-			</div>
-		</div>
-		<div class="tooltip">
-		</div>
-	</dvi>
- 	 <script type="text/javascript" src="js/d3.js"></script>
-     <script type="text/javascript" src="js/index.js" ></script>
-</head>
-<body>
+    <dvi class="container">
+        <div class="box-left">
+            <!-- 左边区域-->
+            <div class="box-china">
+                <!-- 中国排名区域-->
+                <div class="title">中国幸福排名</div>
+                <p></p>
+            </div>
+            <div class="box-radar">
+                <!-- 中国雷达区域-->
+                <div class="title">影响中国幸福指数的各项数据</div>
+                <div class="svg-radar"></div>
+            </div>
+            <div class="box-linechart">
+                <!-- 中国幸福数据曲线区域-->
+                <div class="title">中国幸福分数变化</div>
+                <div class="svg-linechart"></div>
+            </div>
+        </div>
+        <div class="box-center">
+            <!-- 中间区域-->
+            <div class="sys-title">
+                <!-- 主标题-->
+                <div class="title">全球幸福数据可视化系统</div>
+            </div>
+            <div class="global-map">
+                <!-- 地图区域-->
+                <div class="mapcolortip"></div>
+                <p class="color-tip">1-10分的幸福分数</p>
+            </div>
+            <div class="box-scatter" style="margin-top: 30px;">
+                <div class="scatter-select"  style="margin-left: 20px;margin-top: 2px; display: inline-block;
+                vertical-align:middle=;" ></div>
+                <!-- 散点图区域-->
+                <div class="color-tip" style="display: inline-block; float: right ;vertical-align:middle;"></div>
+                <div class="svg-scatterWrapper"></div>
+            </div>
+        </div>
+        <div class="box-right">
+            <!-- 右边区域-->
+            <div class="box-pie">
+                <!-- 中国幸福数据曲线区域-->
+                <div class="title">区域幸福分数占比</div>
+                <div class="svg-pie"></div>
+                <div class="piecolortip"></div>
+            </div>
+            <div class="box-bar">
+                <!-- 中国幸福数据曲线区域-->
+                <div class="title">部分国家幸福数据对比</div>
+                <div class="svg-bar"></div>
+            </div>
+        </div>
+        <div class="tooltip">
+        </div>
+        </div>
+        <script type="text/javascript" src="js/d3.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="js/dropdown.js"></script>
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const select1 = new $Selector({
+                eleSelector: ".scatter-select",
+                options: [
+                    { name: "健康分数-幸福分数", value: "0" },
+                    { name: "人均GDP分数-幸福分数", value: "1" },
+                    { name: "家庭满足分数-幸福分数", value: "2" },
+                    { name: "自由分数-幸福分数", value: "3" },
+                    { name: "腐败感知分数-幸福分数", value: "4" },
+                    { name: "慷慨分数-幸福分数", value: "5" },
+                ],
+                defaultText: "健康分数-幸福分数"
+            });
+        })
+        </script>
 </body>
+
 </html>

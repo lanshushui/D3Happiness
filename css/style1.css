@@ -1,0 +1,124 @@
+ 
+
+
+.my-select {
+    display: inline-block;
+    width: auto;
+    min-width: 300px;
+    box-sizing: border-box;
+    vertical-align: middle;
+    color: #515a6e;
+    font-size: 14px;
+    line-height: normal;
+    position: relative;
+
+}
+
+.select-selection {
+    display: block;
+    height: 40px;
+    box-sizing: border-box;
+    outline: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    position: relative;
+    background: url(../images/box_title.png) top left no-repeat;
+    background-size: cover;
+    border-radius: 4px;
+    color: #ffffff;
+    text-align: center;
+    transition: all .2s ease-in-out;
+}
+
+.select-selection:hover,
+.select-selection.select-focus {
+    border-color: #57a3f3;
+    box-shadow: 0 0 0 2px rgba(45, 140, 240, .2);
+}
+
+.select-selected-value {
+    display:block;
+    line-height: 40px;
+    margin: auto;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.icon-select-arrow {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    line-height: 1;
+    margin-top: -7px;
+    font-size: 14px;
+    color: #808695;
+    transition: all .2s ease-in-out;
+    display: inline-block;
+    font-style: normal;
+    font-weight: 400;
+    font-variant: normal;
+    text-transform: none;
+    text-rendering: auto;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    vertical-align: middle;
+}
+
+.icon-select-arrow::before {
+    content: "";
+    display: block;
+    width: 6px;
+    height: 6px;
+    background-color: transparent;
+    border-left: 1.5px solid #808695;
+    border-bottom: 1.5px solid #808695;
+    transform: rotate(-45deg);
+}
+
+.select-dropdown {
+    width: auto;
+    min-width: 300px;
+    max-height: 200px;
+    overflow: auto;
+    margin: 5px 0;
+    padding: 5px 0;
+    background-color: #0595EB88;
+    box-sizing: border-box;
+    border-radius: 4px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, .2);
+    position: absolute;
+    z-index: 2;
+    transform-origin: center top 0px;
+    transition: all 0.3s;
+    will-change: top, left;
+    top: 30px;
+    left: 0;
+    transform: scale(1, 0);
+    opacity: 0;
+}
+
+.select-item {
+    line-height: 40px;
+    padding: 7px 16px;
+    clear: both;
+    color: #ffffff;
+    font-size: 12px !important;
+    white-space: nowrap;
+    list-style: none;
+    cursor: pointer;
+    transition: background .2s ease-in-out;
+    text-align: center;
+}
+
+.select-item.select-item-selected,
+.select-item:hover {
+    color: #ffffff;
+    background-color: #0595EB77;
+}

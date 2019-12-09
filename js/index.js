@@ -2,7 +2,6 @@
   var csv2016;
   var csv2017;
   var csv2018;
-  var csv2019;
   var mapjson;
   var colors = []; //['#FAEBD7','#CD853F','#8EE5EE','#FFE4E1','#00BFFF','#C0FF3E','#FFF5EE','#FF7F24','#FFFF00','#7FFFD4'];
   colors['Oceania'] = '#FAEBD7';
@@ -11,11 +10,32 @@
   colors['Europe'] = '#FFE4E1';
   colors['Africa'] = '#C0FF3E';
   colors['North America'] = '#8EE5EE';
-  loadData();
 
+  var yearData;
+  loadData();
+  initYearConsole();
+
+  function initYearConsole() {
+      $(".year").click(function() {
+          $(".year").attr("class","year");
+          $(this).attr("class","year select-year");
+          let curYear=$(this).attr("data-value");
+          if(curYear==2015){
+            yearData=csv2015;
+          }else if(curYear==2016){
+             yearData=csv2016;
+          }else if(curYear==2017){
+             yearData=csv2017;
+          }else if(curYear==2018){
+             yearData=csv2018;
+          }
+          changYear();
+      });
+  } 
   function loadData() {
       d3.csv("data/2015.csv").then(function(data) {
           csv2015 = data;
+          yearData=csv2015;
           if (loadSuccess()) start();
       });
       d3.csv("data/2016.csv").then(function(data) {
@@ -28,10 +48,6 @@
       });
       d3.csv("data/2018.csv").then(function(data) {
           csv2018 = data;
-          if (loadSuccess()) start();
-      });
-      d3.csv("data/2019.csv").then(function(data) {
-          csv2019 = data;
           if (loadSuccess()) start();
       });
       /**
@@ -53,7 +69,7 @@
   }
 
   function loadSuccess() {
-      return csv2015 != null && csv2016 != null && csv2017 != null && csv2018 != null && csv2018 != null && mapjson != null;
+      return csv2015 != null && csv2016 != null && csv2017 != null && csv2018 != null && mapjson != null;
   }
 
   function start() {
@@ -63,6 +79,18 @@
       drawLineChart();
       drawPie();
       drawScatterChart(0);
+  }
+  function changYear(){
+      drawMap();
+      initChinaRank();
+      drawChinaRadar();
+      drawPie();
+      drawScatterChart(0);
+      $(".select-selected-value").text("健康分数-幸福分数");
+      $(".select-item").attr("class","select-item");
+      $(".select-item:first").attr("class","select-item select-item-selected");
+      d3.select(".bar-chart").remove();
+
   }
   /*
    
@@ -123,7 +151,7 @@
       drawColorTip();
       var width = 600;
       var height = 400;
-      var data = csv2015;
+      var data = yearData;
 
       d3.select(".svg-scatterWrapper").select("svg").remove();
       var svg = d3.select(".svg-scatterWrapper")
@@ -310,7 +338,7 @@
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //画饼状图
   function drawPie() {
-
+  d3.select(".svg-pie").select("svg").remove();
       function Region(country) {
           this.name = country.Region;
           this.avgHappiness = parseFloat(country.HappinessScore);
@@ -323,8 +351,8 @@
           }
       }
       var data = [];
-      for (let i = 0; i < csv2015.length; i++) {
-          var country = csv2015[i];
+      for (let i = 0; i < yearData.length; i++) {
+          var country = yearData[i];
           var flag = false;
           for (let j = 0; j < data.length; j++) {
               if (data[j].name == country.Region) {
@@ -538,6 +566,7 @@
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //画雷达
   function drawChinaRadar() {
+     d3.select(".svg-radar").select("svg").remove();
       var radarconfig = {
           width: 320,
           height: 320,
@@ -552,7 +581,7 @@
       var allAxis = ['HappinessScore', 'Health', 'Freedom', 'Trust', 'Generosity'];
 
       ////创造数据
-      var chinadata = csv2015.filter(function(value, key) {
+      var chinadata = yearData.filter(function(value, key) {
           return value.Country == 'China'; //只选中国
       })[0];
       var data = [];
@@ -684,11 +713,11 @@
   }
   //显示中国排序
   function initChinaRank() {
-      for (var i = 0; i < csv2015.length; ++i) {
+      for (var i = 0; i < yearData.length; ++i) {
           //获取国家名
-          var country = csv2015[i].Country;
+          var country = yearData[i].Country;
           if (country == 'China') {
-              d3.select(".box-china").select('p').text(csv2015[i].HappinessRank);
+              d3.select(".box-china").select('p').text(yearData[i].HappinessRank);
               break;
           }
       }
@@ -696,15 +725,16 @@
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   
   //画地图函数
   function drawMap() {
+      d3.select(".global-map").select("svg").remove();
       //初始化happinessScore变量
       for (var j = 0; j < mapjson.features.length; ++j) {
           mapjson.features[j].properties.happinessScore = parseFloat(0);
       }
-      for (var i = 0; i < csv2015.length; ++i) {
+      for (var i = 0; i < yearData.length; ++i) {
           //获取国家名
-          var country = csv2015[i].Country;
+          var country = yearData[i].Country;
           //获取对应的幸福分数
-          var happinessScore = csv2015[i].HappinessScore;
+          var happinessScore = yearData[i].HappinessScore;
           //在GeoJSON中找到相应的州
           for (var j = 0; j < mapjson.features.length; ++j) {
               var jsonCountry = mapjson.features[j].properties.name;

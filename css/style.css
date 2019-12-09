@@ -175,4 +175,39 @@
 .piecolortip{
     margin: 20px 0 0 20px;
 }
-
+.box-consloe>.title{
+    width: 96%;
+    height: 40px;
+    line-height: 40px;
+    background: url(../images/box_title.png) top left no-repeat;
+    background-size: 100% 100%;
+    text-align: center;
+    margin: auto;   
+    margin-top: 10px;
+    color: white;
+}
+.year-list{
+    width: 95%;
+    height: 40px;
+    margin: auto; 
+    margin-top: 20px;
+    margin-bottom: 20px;
+    list-style: none;
+}
+.year-list li{
+    width: 25%;
+    height: 40px;
+    line-height: 40px;
+    float: left;
+}
+.year-list .year{
+    background-color: #00BFFF;
+    padding: 10px;
+    border-radius: 4px;
+    color: #ffffff;
+    cursor: pointer;
+}
+.year-list .select-year,
+.year-list .year:hover{
+     background-color: #0044FF;
+}

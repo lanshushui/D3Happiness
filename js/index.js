@@ -12,30 +12,32 @@
   colors['North America'] = '#8EE5EE';
 
   var yearData;
+  var selectCountry = "China";
   loadData();
   initYearConsole();
 
   function initYearConsole() {
       $(".year").click(function() {
-          $(".year").attr("class","year");
-          $(this).attr("class","year select-year");
-          let curYear=$(this).attr("data-value");
-          if(curYear==2015){
-            yearData=csv2015;
-          }else if(curYear==2016){
-             yearData=csv2016;
-          }else if(curYear==2017){
-             yearData=csv2017;
-          }else if(curYear==2018){
-             yearData=csv2018;
+          $(".year").attr("class", "year");
+          $(this).attr("class", "year select-year");
+          let curYear = $(this).attr("data-value");
+          if (curYear == 2015) {
+              yearData = csv2015;
+          } else if (curYear == 2016) {
+              yearData = csv2016;
+          } else if (curYear == 2017) {
+              yearData = csv2017;
+          } else if (curYear == 2018) {
+              yearData = csv2018;
           }
           changYear();
       });
-  } 
+  }
+
   function loadData() {
       d3.csv("data/2015.csv").then(function(data) {
           csv2015 = data;
-          yearData=csv2015;
+          yearData = csv2015;
           if (loadSuccess()) start();
       });
       d3.csv("data/2016.csv").then(function(data) {
@@ -74,23 +76,30 @@
 
   function start() {
       drawMap();
-      initChinaRank();
-      drawChinaRadar();
+      initCountryRank();
+      drawCountryRadar();
       drawLineChart();
       drawPie();
       drawScatterChart(0);
   }
-  function changYear(){
+  //年份控制逻辑函数
+  function changYear() {
       drawMap();
-      initChinaRank();
-      drawChinaRadar();
+      initCountryRank();
+      drawCountryRadar();
       drawPie();
       drawScatterChart(0);
       $(".select-selected-value").text("健康分数-幸福分数");
-      $(".select-item").attr("class","select-item");
-      $(".select-item:first").attr("class","select-item select-item-selected");
+      $(".select-item").attr("class", "select-item");
+      $(".select-item:first").attr("class", "select-item select-item-selected");
       d3.select(".bar-chart").remove();
 
+  }
+
+  function showCountryInfo() {
+      initCountryRank();
+      drawCountryRadar();
+      drawLineChart();
   }
   /*
    
@@ -102,7 +111,7 @@
   **/
   function drawScatterChart(value) {
       function drawColorTip() {
-        d3.select(".box-scatter").select("svg").remove();
+          d3.select(".box-scatter").select("svg").remove();
           let svg = d3.select(".box-scatter")
               .select(".color-tip")
               .append("svg")
@@ -132,22 +141,24 @@
               i = i + 1;
           }
       }
-      function getXAttr(country){
-        if(value==0) return country.Health;
-        else if(value==1) return country.Economy;
-        else if(value==2) return country.Family;
-        else if(value==3) return country.Freedom;
-        else if(value==4) return country.Trust;
-        else if(value==5) return country.Generosity;
+
+      function getXAttr(country) {
+          if (value == 0) return country.Health;
+          else if (value == 1) return country.Economy;
+          else if (value == 2) return country.Family;
+          else if (value == 3) return country.Freedom;
+          else if (value == 4) return country.Trust;
+          else if (value == 5) return country.Generosity;
       }
-      function getXTitle(){
-        if(value==0) return "健康分数";
-        else if(value==1) return "人均GDP分数";
-        else if(value==2) return "家庭满足分数";
-        else if(value==3) return "自由分数";
-        else if(value==4) return "腐败感知分数";
-        else if(value==5) return "慷慨分数";
-      }      
+
+      function getXTitle() {
+          if (value == 0) return "健康分数";
+          else if (value == 1) return "人均GDP分数";
+          else if (value == 2) return "家庭满足分数";
+          else if (value == 3) return "自由分数";
+          else if (value == 4) return "腐败感知分数";
+          else if (value == 5) return "慷慨分数";
+      }
       drawColorTip();
       var width = 600;
       var height = 400;
@@ -221,7 +232,7 @@
 
               d3.select(".tooltip").style('display', 'block');
               d3.select(".tooltip").html('国家名： ' + d.Country + '<br/>' + '幸福分数为' + d.HappinessScore +
-                  '<br/>' + getXTitle()+'为' + getXAttr(d));
+                  '<br/>' + getXTitle() + '为' + getXAttr(d));
 
               d3.select(this).attr('fill', 'rgba(255,99,71)');
               d3.select(".tooltip").style("left", (d3.event.pageX) + "px")
@@ -338,7 +349,8 @@
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //画饼状图
   function drawPie() {
-  d3.select(".svg-pie").select("svg").remove();
+      d3.select(".svg-pie").select("svg").remove();
+
       function Region(country) {
           this.name = country.Region;
           this.avgHappiness = parseFloat(country.HappinessScore);
@@ -455,6 +467,8 @@
 
   //画折线图
   function drawLineChart() {
+      d3.select(".box-linechart").select('.title').text("Happiness Scores of " + selectCountry);
+      var svg = d3.select(".svg-linechart").select("svg").remove();
       var data = [];
 
       var chinadata;
@@ -465,25 +479,25 @@
       data.push(o);
 
       var o = {};
-      chinadata = csv2015.filter(function(value, key) { return value.Country == 'China'; })[0];
+      chinadata = csv2015.filter(function(value, key) { return value.Country == selectCountry; })[0];
       o['x'] = 2015;
       o['y'] = chinadata['HappinessScore'];
       data.push(o);
 
       var o = {};
-      chinadata = csv2016.filter(function(value, key) { return value.Country == 'China'; })[0];
+      chinadata = csv2016.filter(function(value, key) { return value.Country == selectCountry; })[0];
       o['x'] = 2016;
       o['y'] = chinadata['HappinessScore'];
       data.push(o);
 
       var o = {};
-      chinadata = csv2017.filter(function(value, key) { return value.Country == 'China'; })[0];
+      chinadata = csv2017.filter(function(value, key) { return value.Country == selectCountry; })[0];
       o['x'] = 2017;
       o['y'] = chinadata['HappinessScore'];
       data.push(o);
 
       var o = {};
-      chinadata = csv2018.filter(function(value, key) { return value.Country == 'China'; })[0];
+      chinadata = csv2018.filter(function(value, key) { return value.Country == selectCountry; })[0];
       o['x'] = 2018;
       o['y'] = chinadata['HappinessScore'];
       data.push(o);
@@ -554,19 +568,20 @@
                       let x = x0 + xScale(data[i].x);
                       let y = y0 - yScale(data[i].y);
                       path.lineTo(x, y);
+                      path.moveTo(x, y);
                   }
               }
               return path.toString();
           })
-          .style("fill", function(d, i) { return '#ff5555'; })
-          .style("fill-opacity", 0.7);
+          .style("fill", function(d, i) { return '#ff5555'; });
 
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //画雷达
-  function drawChinaRadar() {
-     d3.select(".svg-radar").select("svg").remove();
+  function drawCountryRadar() {
+      d3.select(".box-radar").select('.title').text("Data Affecting " + selectCountry + "'s Happiness");
+      d3.select(".svg-radar").select("svg").remove();
       var radarconfig = {
           width: 320,
           height: 320,
@@ -582,7 +597,7 @@
 
       ////创造数据
       var chinadata = yearData.filter(function(value, key) {
-          return value.Country == 'China'; //只选中国
+          return value.Country == selectCountry; //只选中国
       })[0];
       var data = [];
       var arr = [];
@@ -711,12 +726,14 @@
           .style("fill-opacity", 0.7);
 
   }
-  //显示中国排序
-  function initChinaRank() {
+  //显示国家排序
+  function initCountryRank() {
+      console.log(selectCountry);
+      d3.select(".box-china").select('.title').text("//      " + selectCountry + " Happiness Rank" + "      //");
       for (var i = 0; i < yearData.length; ++i) {
           //获取国家名
           var country = yearData[i].Country;
-          if (country == 'China') {
+          if (country == selectCountry) {
               d3.select(".box-china").select('p').text(yearData[i].HappinessRank);
               break;
           }
@@ -788,6 +805,8 @@
                   return "#ccc";
               }
           })
+          .attr('stroke', 'rgba(255,255,255,1)')
+          .attr('stroke-width', 1)
           .on("mousemove", function(d, i) {
               if (d.properties.happinessScore == 0) return;
 
@@ -808,6 +827,12 @@
 
               d3.select(".tooltip").style('display', 'none');
           })
-          .attr('stroke', 'rgba(255,255,255,1)')
-          .attr('stroke-width', 1);
+          .on("click", function(d, i) {
+              //点击事件
+              if (d.properties.happinessScore == 0) return;
+              selectCountry = d.properties.name;
+              if (selectCountry == "United States of America") selectCountry = "United States";
+              showCountryInfo();
+          });
+
   }

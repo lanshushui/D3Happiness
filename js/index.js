@@ -10,6 +10,7 @@
   colors['Europe'] = '#FFE4E1';
   colors['Africa'] = '#C0FF3E';
   colors['North America'] = '#8EE5EE';
+  var keyAttr=0;
 
   var yearData;
   var selectCountry = "China";
@@ -79,7 +80,7 @@
       initCountryRank();
       drawCountryRadar();
       drawLineChart();
-      drawPie();
+      drawRegionBar();
       drawScatterChart(0);
   }
   //年份控制逻辑函数
@@ -87,7 +88,7 @@
       drawMap();
       initCountryRank();
       drawCountryRadar();
-      drawPie();
+      drawRegionBar();
       drawScatterChart(0);
       $(".select-selected-value").text("健康分数-幸福分数");
       $(".select-item").attr("class", "select-item");
@@ -344,21 +345,33 @@
               d3.select(this).attr('fill', color);
               d3.select(".tooltip").style('display', 'none');
           });
-
   }
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  //画饼状图
-  function drawPie() {
+  //画区域信息
+  function drawRegionBar() {
       d3.select(".svg-pie").select("svg").remove();
-
+      function getAttr(country){
+        if(keyAttr==0){
+          return parseFloat(country.HappinessScore);
+        }else if(keyAttr==1){
+          return parseFloat(country.Health);
+        }else if(keyAttr==2){
+          return parseFloat(country.Freedom);
+        }else if(keyAttr==3){
+          return parseFloat(country.Trust);
+        }else if(keyAttr==4){
+          return parseFloat(country.Generosity);
+        }
+      }
       function Region(country) {
+          this.a="";
           this.name = country.Region;
-          this.avgHappiness = parseFloat(country.HappinessScore);
+          this.value = getAttr(country);
           this.sum = 1;
           this.countries = [country];
           this.addCountry = function(country) {
               this.countries.push(country);
-              this.avgHappiness = ((this.avgHappiness * this.sum) + parseFloat(country.HappinessScore)) / (this.sum + 1);
+              this.value = ((this.value * this.sum) + getAttr(country)) / (this.sum + 1);
               this.sum += 1;
           }
       }
@@ -377,89 +390,43 @@
               data.push(new Region(country));
           }
       }
-      data.sort(function(val1, val2) {
-          return val2.avgHappiness - val1.avgHappiness;
-      });
       // console.log(data);
       //上面代码初始化数据
-      var width = 200;
-      var height = 200;
-      var svg = d3.select(".svg-pie")
+      var width = 350;
+      var height = 350;
+      var svg = d3.select(".reigon-bar-div")
           .append("svg")
           .attr("width", width)
           .attr("height", height)
-          .attr("class", "pie");
+          .attr("class", "svg-bar");
 
-      var piedata = data.map(function(element) { return element.avgHappiness; });
-      var arc = d3.arc()
-          .innerRadius(width / 3)
-          .outerRadius(width / 2);
-      //显示圆饼    
-      var arcs = svg.selectAll("g")
-          .data(d3.pie()(piedata)) // 经过转换后的数据
-          .enter()
-          .append("g")
-          .attr("class", "arc")
-          .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
+      var xAxisScale = d3.scaleBand()
+          .range([0, (width - 50)])
+          .domain(data.map(function(element) { return element.name }))
+          .paddingInner(1);
 
-      arcs.append("path")
-          .attr("fill", function(d, i) {
-              return colors[data[i].name];
-          })
-          .attr("d", arc)
+      var yAxisScale = d3.scaleLinear()
+          .domain([10, 0])
+          .range([0, (height - 50)]); //设置输出范围     
 
-          .on("mousemove", function(d, i) {
-              d3.select("html").style("cursor", "pointer");
-          })
-          .on("mouseout", function(d, i) {
-              d3.select("html").style("cursor", "default");
-          })
-          .on("click", function(d, i) {
-              //点击事件
-              drawBar(data[i].countries, colors[data[i].name]);
-          });
+      var xAxis = d3.axisBottom()
+          .scale(xAxisScale);
 
 
-      //显示百分比文字
-      arcs.append("text")
-          .attr("transform", function(d) {
+      var yAxis = d3.axisLeft()
+          .scale(yAxisScale);
 
-              return "translate(" + arc.centroid(d) + ")"; // 弧中心坐标
-          })
-          .attr("text-anchor", "middle")
-          .attr("fill", 'black')
-          .style("font-size", "10px")
-          .style("pointer-events", "none")
-          .text(function(d, i) {
-              return (d.data / (d3.sum(piedata)) * 100).toFixed(1) + "%"; //显示地区文字
-          });
+      svg.append("g") // 分组（group）元素
+          .call(xAxis) // 在g元素上利用call函数调用xAxis
+          .attr("class", "axis")
+          .attr("transform", "translate(" + 25 + "," + (height - 20) + ")");
 
-      divs = d3.select(".piecolortip").selectAll("div")
-          .data(data)
-          .enter()
-          .append("div")
-          .style("display", "block");
-
-      divs.append("div")
-          .style("width", "14px")
-          .style("height", "14px")
-          .style("display", "inline-block")
-          .style("vertical-align", "middle")
-          .style("background-color", function(d, i) {
-              return colors[d.name];
-          });
-
-      divs.append("div")
-          .style("color", "white")
-          .style("font-size", "10px")
-          .style("display", "inline-block")
-          .style("height", "10px")
-          .style("text-align", "center")
-          .style("line-height", "10px")
-          .style("margin-left", "20px")
-          .html(function(d, i) {
-              return d.name;
-          });
+      // 调用y轴
+      svg.append("g") // 分组（group）元素
+          .call(yAxis) // 在g元素上利用call函数调用xAxis
+          .attr("class", "yxis")
+          .attr("transform", "translate(" + 25 + "," + 30 + ")");
+      svg.select(".axis").selectAll(".tick").remove();
 
   }
   //////////////////////////////////////////////////////////////////////////////////
@@ -513,7 +480,6 @@
           .attr("width", width)
           .attr("height", height)
           .attr("class", "line-chart");
-
 
       var xAxisScale = d3.scaleBand()
           .range([0, (width - 50)])

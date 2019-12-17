@@ -138,7 +138,7 @@
     stroke: white;
 }
 /* 右边CSS*/
-.box-pie>.title{
+.box-region-bar>.title{
     width: 96%;
     height: 40px;
     line-height: 40px;
@@ -149,11 +149,7 @@
     margin-top: 10px;
     color: white;
 }
-.pie{
-    margin:  auto;
-    margin-top: 20px;
-    display:  block;
-}
+
 .box-bar>.title{
     width: 96%;
     height: 40px;
@@ -164,6 +160,9 @@
     margin: auto;   
     margin-top: 20px;
     color: white;
+}
+.reigon-bar-div path,.reigon-bar-div line,.reigon-bar-div text{
+    stroke: white;
 }
 .bar-chart path{
     stroke: white;

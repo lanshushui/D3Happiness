@@ -1,7 +1,7 @@
  
 
 
-.my-select {
+.scatter-select .my-select {
     display: inline-block;
     width: auto;
     min-width: 300px;
@@ -13,7 +13,19 @@
     position: relative;
 
 }
+.box-region-bar-select .my-select{
+   display: inline-block;
+    width: auto;
+    min-width: 300px;
+    box-sizing: border-box;
+    vertical-align: middle;
+    color: #515a6e;
+    font-size: 14px;
+    line-height: normal;
+    position: relative;
+    margin: auto;
 
+}
 .select-selection {
     display: block;
     height: 40px;

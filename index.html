@@ -60,9 +60,9 @@
             </div>
             <div class="box-region-bar">
                 <!-- 中国幸福数据曲线区域-->
-                <div class="title">Happiness Score of Region</div>
+                
+                  <div class="box-region-bar-select" style="margin-left: 25px"></div>
                 <div class="reigon-bar-div"></div>
-                <div class="piecolortip"></div>
             </div>
             <div class="box-bar">
                 <!-- 中国幸福数据曲线区域-->
@@ -91,6 +91,19 @@
                 ],
                 defaultText: "健康分数-幸福分数"
             });
+            const select2 = new $Selector({
+                eleSelector: ".box-region-bar-select",
+                options: [
+                    { name: "Happiness Score", value: "0" },
+                    { name: "Healthy", value: "1" },
+                    { name: "Economy", value: "2" },
+                    { name: "Family", value: "3" },
+                    { name: "Freedom", value: "4" },
+                    { name: "Trust", value: "5" },
+                    { name: "Generosity", value: "6" },
+                ],
+                defaultText: "Happiness Score"
+            });            
         })
         </script>
 </body>

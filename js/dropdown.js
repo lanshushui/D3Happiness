@@ -138,7 +138,9 @@
                 }
             });
             this._selectDropup();
-            drawScatterChart(this.defaultValue);
+            console.log(this.parentEle.className);
+            if(this.parentEle.className=="scatter-select")drawScatterChart(this.defaultValue);
+            if(this.parentEle.className=="box-region-bar-select")drawRegionBar(this.defaultValue);
         },
 
         //node遍历是否是子元素包裹元素

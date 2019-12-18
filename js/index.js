@@ -10,7 +10,6 @@
   colors['Europe'] = '#FFE4E1';
   colors['Africa'] = '#C0FF3E';
   colors['North America'] = '#8EE5EE';
-  var keyAttr=0;
 
   var yearData;
   var selectCountry = "China";
@@ -53,15 +52,6 @@
           csv2018 = data;
           if (loadSuccess()) start();
       });
-      /**
-          {
-          "continent_cname": "北美洲",
-          "continent_name": "NA",
-          "country_cname": "美国",
-          "country_code": "US",
-          "country_name": "United States of America"
-      }
-      **/
       d3.json("data/world-countries.json").then(function(json) {
           json.features = json.features.filter(function(value, key) {
               return value.properties.name != 'Antarctica'; //过滤南极洲
@@ -80,7 +70,7 @@
       initCountryRank();
       drawCountryRadar();
       drawLineChart();
-      drawRegionBar();
+      drawRegionBar(0);
       drawScatterChart(0);
   }
   //年份控制逻辑函数
@@ -88,9 +78,10 @@
       drawMap();
       initCountryRank();
       drawCountryRadar();
-      drawRegionBar();
+      drawRegionBar(0);
       drawScatterChart(0);
-      $(".select-selected-value").text("健康分数-幸福分数");
+      $(".scatter-select .select-selected-value").text("健康分数-幸福分数");
+      $(".box-region-bar-select .select-selected-value").text("Happiness Score");
       $(".select-item").attr("class", "select-item");
       $(".select-item:first").attr("class", "select-item select-item-selected");
       d3.select(".bar-chart").remove();
@@ -348,23 +339,26 @@
   }
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //画区域信息
-  function drawRegionBar() {
-      d3.select(".svg-pie").select("svg").remove();
+  function drawRegionBar(keyAttr) {
+      d3.select(".reigon-bar-div").select("svg").remove();
       function getAttr(country){
         if(keyAttr==0){
           return parseFloat(country.HappinessScore);
         }else if(keyAttr==1){
           return parseFloat(country.Health);
         }else if(keyAttr==2){
-          return parseFloat(country.Freedom);
+          return parseFloat(country.Economy);
         }else if(keyAttr==3){
-          return parseFloat(country.Trust);
+          return parseFloat(country.Family);
         }else if(keyAttr==4){
+          return parseFloat(country.Freedom);
+        }else if(keyAttr==5){
+          return parseFloat(country.Trust);
+        }else if(keyAttr==6){
           return parseFloat(country.Generosity);
         }
       }
       function Region(country) {
-          this.a="";
           this.name = country.Region;
           this.value = getAttr(country);
           this.sum = 1;
@@ -390,7 +384,7 @@
               data.push(new Region(country));
           }
       }
-      // console.log(data);
+       console.log(data);
       //上面代码初始化数据
       var width = 350;
       var height = 350;
@@ -427,6 +421,50 @@
           .attr("class", "yxis")
           .attr("transform", "translate(" + 25 + "," + 30 + ")");
       svg.select(".axis").selectAll(".tick").remove();
+
+
+      var barWrapper = svg.append("g")
+          .attr("class", "barWrapper");
+
+      var xScale = d3.scaleBand()
+          .domain(d3.range(data.length))
+          .range([0, (width - 50)])
+          .paddingInner(1)
+          .paddingOuter(1);
+
+      barWrapper.selectAll("rect") //选择了空集
+          .data(data) //绑定dataSet
+          .enter() //返回enter部分
+          .append("rect") //数据中每个值，添加p元素
+          .attr("fill", function(d, i) {
+              return colors[d.name];
+          }) //设置颜色
+          .attr("x", function(d,i){
+         
+            return xScale(i); //设置矩形左上角X坐标
+          }) 
+          .attr("y", function(d, i) {
+              return yAxisScale(d.value)+30; //设置矩形左上角Y坐标
+          }) 
+          .attr("width", function(d) {
+              return 25; //设置每个条形的宽度
+          })
+          .attr("height", function(d) {
+              return height - 20-yAxisScale(d.value)-30; //设置每个条形的高度
+          })
+          .on("mousemove", function(d, i) {
+
+              d3.select(".tooltip").style('display', 'block');
+              d3.select(".tooltip").html('洲名： ' + d.name + '<br/>' + '分数为' + d.value.toFixed(2));
+
+              d3.select(this).attr('fill', 'rgba(255,99,71)');
+              d3.select(".tooltip").style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY) + "px")
+          })
+          .on("mouseout", function(d, i) {
+              d3.select(this).attr('fill', colors[d.name]);
+              d3.select(".tooltip").style('display', 'none');
+          });          
 
   }
   //////////////////////////////////////////////////////////////////////////////////

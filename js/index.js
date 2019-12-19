@@ -85,6 +85,13 @@
       $(".select-item").attr("class", "select-item");
       $(".select-item:first").attr("class", "select-item select-item-selected");
       d3.select(".bar-chart").remove();
+      if($(".select-year").attr("data-value")==2018){
+        $(".box-scatter .select-item[data-value='2']").hide();
+        $(".box-region-bar .select-item[data-value='3']").hide();
+      }else{
+        $(".box-scatter .select-item[data-value='2']").show();
+        $(".box-region-bar .select-item[data-value='3']").show();
+      }
 
   }
 
@@ -340,24 +347,29 @@
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //画区域信息
   function drawRegionBar(keyAttr) {
-      d3.select(".reigon-bar-div").select("svg").remove();
-      function getAttr(country){
-        if(keyAttr==0){
-          return parseFloat(country.HappinessScore);
-        }else if(keyAttr==1){
-          return parseFloat(country.Health);
-        }else if(keyAttr==2){
-          return parseFloat(country.Economy);
-        }else if(keyAttr==3){
-          return parseFloat(country.Family);
-        }else if(keyAttr==4){
-          return parseFloat(country.Freedom);
-        }else if(keyAttr==5){
-          return parseFloat(country.Trust);
-        }else if(keyAttr==6){
-          return parseFloat(country.Generosity);
-        }
+
+      function getAttr(country) {
+          if (keyAttr == 0) {
+              return parseFloat(country.HappinessScore);
+          } else if (keyAttr == 1) {
+              return parseFloat(country.Health);
+          } else if (keyAttr == 2) {
+              return parseFloat(country.Economy);
+          } else if (keyAttr == 3) {
+              return parseFloat(country.Family);
+          } else if (keyAttr == 4) {
+              return parseFloat(country.Freedom);
+          } else if (keyAttr == 5) {
+              return parseFloat(country.Trust);
+          } else if (keyAttr == 6) {
+              return parseFloat(country.Generosity);
+          }
       }
+
+      function keys(d) {
+          return d.name;
+      }
+
       function Region(country) {
           this.name = country.Region;
           this.value = getAttr(country);
@@ -369,6 +381,7 @@
               this.sum += 1;
           }
       }
+      
       var data = [];
       for (let i = 0; i < yearData.length; i++) {
           var country = yearData[i];
@@ -384,16 +397,8 @@
               data.push(new Region(country));
           }
       }
-       console.log(data);
-      //上面代码初始化数据
       var width = 350;
       var height = 350;
-      var svg = d3.select(".reigon-bar-div")
-          .append("svg")
-          .attr("width", width)
-          .attr("height", height)
-          .attr("class", "svg-bar");
-
       var xAxisScale = d3.scaleBand()
           .range([0, (width - 50)])
           .domain(data.map(function(element) { return element.name }))
@@ -402,6 +407,43 @@
       var yAxisScale = d3.scaleLinear()
           .domain([10, 0])
           .range([0, (height - 50)]); //设置输出范围     
+
+
+      var xScale = d3.scaleBand()
+          .domain(d3.range(data.length))
+          .range([0, (width - 50)])
+          .paddingInner(1)
+          .paddingOuter(1);
+
+      var svg=d3.select(".reigon-bar-div").select("svg") ;
+
+      if ($(".reigon-bar-div svg").length!=0) {
+          var bars = svg.selectAll("rect");
+          bars.data(data, keys)
+              .transition()
+              .duration(500)
+              .ease(d3.easeLinear)
+              .attr("x", function(d, i) {
+                  return xScale(i); //设置矩形左上角X坐标
+              })
+              .attr("y", function(d, i) {
+                  return yAxisScale(d.value) + 30; //设置矩形左上角Y坐标
+              })
+              .attr("width", function(d) {
+                  return 25; //设置每个条形的宽度
+              })
+              .attr("height", function(d) {
+                  return height - 20 - yAxisScale(d.value) - 30; //设置每个条形的高度
+              });
+          return;
+      }
+      //上面代码初始化数据
+
+      svg = d3.select(".reigon-bar-div")
+          .append("svg")
+          .attr("width", width)
+          .attr("height", height)
+          .attr("class", "svg-bar");
 
       var xAxis = d3.axisBottom()
           .scale(xAxisScale);
@@ -426,31 +468,26 @@
       var barWrapper = svg.append("g")
           .attr("class", "barWrapper");
 
-      var xScale = d3.scaleBand()
-          .domain(d3.range(data.length))
-          .range([0, (width - 50)])
-          .paddingInner(1)
-          .paddingOuter(1);
 
       barWrapper.selectAll("rect") //选择了空集
-          .data(data) //绑定dataSet
+          .data(data, keys) //绑定dataSet
           .enter() //返回enter部分
           .append("rect") //数据中每个值，添加p元素
           .attr("fill", function(d, i) {
               return colors[d.name];
           }) //设置颜色
-          .attr("x", function(d,i){
-         
-            return xScale(i); //设置矩形左上角X坐标
-          }) 
+          .attr("x", function(d, i) {
+
+              return xScale(i); //设置矩形左上角X坐标
+          })
           .attr("y", function(d, i) {
-              return yAxisScale(d.value)+30; //设置矩形左上角Y坐标
-          }) 
+              return yAxisScale(d.value) + 30; //设置矩形左上角Y坐标
+          })
           .attr("width", function(d) {
               return 25; //设置每个条形的宽度
           })
           .attr("height", function(d) {
-              return height - 20-yAxisScale(d.value)-30; //设置每个条形的高度
+              return height - 20 - yAxisScale(d.value) - 30; //设置每个条形的高度
           })
           .on("mousemove", function(d, i) {
 
@@ -464,7 +501,7 @@
           .on("mouseout", function(d, i) {
               d3.select(this).attr('fill', colors[d.name]);
               d3.select(".tooltip").style('display', 'none');
-          });          
+          });
 
   }
   //////////////////////////////////////////////////////////////////////////////////

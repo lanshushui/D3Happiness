@@ -10,9 +10,12 @@
   colors['Europe'] = '#FFE4E1';
   colors['Africa'] = '#C0FF3E';
   colors['North America'] = '#8EE5EE';
-
+  var countriesColor = ["#5CACEE", "#FF8C00", "#FF4500", "#A020F0", "#B3EE3A"];
   var yearData;
   var selectCountry = "China";
+  var isPressCtrl = false;
+  var selectCountries = [];
+  setKeyEventListener();
   loadData();
   initYearConsole();
 
@@ -85,12 +88,12 @@
       $(".select-item").attr("class", "select-item");
       $(".select-item:first").attr("class", "select-item select-item-selected");
       d3.select(".bar-chart").remove();
-      if($(".select-year").attr("data-value")==2018){
-        $(".box-scatter .select-item[data-value='2']").hide();
-        $(".box-region-bar .select-item[data-value='3']").hide();
-      }else{
-        $(".box-scatter .select-item[data-value='2']").show();
-        $(".box-region-bar .select-item[data-value='3']").show();
+      if ($(".select-year").attr("data-value") == 2018) {
+          $(".box-scatter .select-item[data-value='2']").hide();
+          $(".box-region-bar .select-item[data-value='3']").hide();
+      } else {
+          $(".box-scatter .select-item[data-value='2']").show();
+          $(".box-region-bar .select-item[data-value='3']").show();
       }
 
   }
@@ -99,6 +102,69 @@
       initCountryRank();
       drawCountryRadar();
       drawLineChart();
+
+      function drawColorTip() {
+
+          d3.select(".countries-color-tip").select("svg").remove();
+          if(selectCountries.length==0) return;
+          let svg = d3.select(".countries-color-tip")
+              .append("svg")
+              .attr("width", "260")
+              .attr("height", 40)
+              .style("margin-top","10px")
+
+          svg.selectAll("rect")
+              .data(selectCountries)
+              .enter()
+              .append("rect")
+              .attr("x", function(d, i) {
+                  return i % 3 * 90 ;
+              })
+              .attr("y", function(d, i) {
+                  return parseInt(i / 3) * 20 +5;
+              })
+              .attr("fill", function(d, i) {
+                  return countriesColor[i];
+              })
+
+              .attr("width", function(d,i) { //每个矩形的宽度 
+                  return 10;
+              })
+              .attr("height", function(d,i) { //每个矩形的宽度 
+                  return 10;
+              });
+          svg.selectAll("text")
+              .data(selectCountries)
+              .enter()
+              .append("text")
+              .attr("x", function(d, i) {
+                  return i % 3 * 90 + 20;
+              })
+              .attr("y", function(d, i) {
+                  return parseInt(i / 3) * 20 + 13;
+              })
+              .text(function(d, i) {
+                  return selectCountries[i];
+              })
+              .attr("fill", "white")
+              .style("font-size", "10px");
+      }
+      drawColorTip();
+  }
+
+  function setKeyEventListener() {
+      $(document).keydown(function(event) {
+          if (event.keyCode == 17) {
+              isPressCtrl = true;
+          } else {
+              isPressCtrl = false;
+          }
+      });
+      $(document).keyup(function(event) {
+          if (event.keyCode == 17) {
+              isPressCtrl = false;
+          }
+      });
   }
   /*
    
@@ -213,8 +279,11 @@
       var bubbleWrapper = svg.append("g").attr("class", "bubbleWrapper");
 
 
+
       bubbleWrapper.selectAll("circle")
-          .data(data)
+          .data(data, function(d) {
+              return d.Country;
+          })
           .enter()
           .append("circle")
           .attr("cx", function(d) {
@@ -381,7 +450,7 @@
               this.sum += 1;
           }
       }
-      
+
       var data = [];
       for (let i = 0; i < yearData.length; i++) {
           var country = yearData[i];
@@ -415,9 +484,9 @@
           .paddingInner(1)
           .paddingOuter(1);
 
-      var svg=d3.select(".reigon-bar-div").select("svg") ;
+      var svg = d3.select(".reigon-bar-div").select("svg");
 
-      if ($(".reigon-bar-div svg").length!=0) {
+      if ($(".reigon-bar-div svg").length != 0) {
           var bars = svg.selectAll("rect");
           bars.data(data, keys)
               .transition()
@@ -509,43 +578,61 @@
 
   //画折线图
   function drawLineChart() {
-      d3.select(".box-linechart").select('.title').text("Happiness Scores of " + selectCountry);
+      if (selectCountries.length == 0) {
+          d3.select(".box-linechart").select('.title').text("Happiness Scores of " + selectCountry);
+      } else {
+          d3.select(".box-linechart").select('.title').text("Happiness Scores of Some");
+      }
+
       var svg = d3.select(".svg-linechart").select("svg").remove();
+
+      var colors = ["#5CACEE", "#FF8C00", "#FF4500", "#A020F0", "#B3EE3A"];
+      var originData = [];
+      if (selectCountries.length == 0) {
+          originData.push(selectCountry);
+      } else {
+          originData = selectCountries;
+      }
       var data = [];
 
-      var chinadata;
+      for (var i = 0; i < originData.length; i++) {
 
-      var o = {};
-      o['x'] = 0;
-      o['y'] = 0;
-      data.push(o);
+          var name = originData[i];
+          var iData;
+          var iArr = [];
+          var o = {};
+          o['x'] = 0;
+          o['y'] = 0;
+          iArr.push(o);
 
-      var o = {};
-      chinadata = csv2015.filter(function(value, key) { return value.Country == selectCountry; })[0];
-      o['x'] = 2015;
-      o['y'] = chinadata['HappinessScore'];
-      data.push(o);
+          var o = {};
+          iData = csv2015.filter(function(value, key) { return value.Country == name; })[0];
+          o['x'] = 2015;
+          o['y'] = iData['HappinessScore'];
+          iArr.push(o);
 
-      var o = {};
-      chinadata = csv2016.filter(function(value, key) { return value.Country == selectCountry; })[0];
-      o['x'] = 2016;
-      o['y'] = chinadata['HappinessScore'];
-      data.push(o);
+          var o = {};
+          iData = csv2016.filter(function(value, key) { return value.Country == name; })[0];
+          o['x'] = 2016;
+          o['y'] = iData['HappinessScore'];
+          iArr.push(o);
 
-      var o = {};
-      chinadata = csv2017.filter(function(value, key) { return value.Country == selectCountry; })[0];
-      o['x'] = 2017;
-      o['y'] = chinadata['HappinessScore'];
-      data.push(o);
+          var o = {};
+          iData = csv2017.filter(function(value, key) { return value.Country == name; })[0];
+          o['x'] = 2017;
+          o['y'] = iData['HappinessScore'];
+          iArr.push(o);
 
-      var o = {};
-      chinadata = csv2018.filter(function(value, key) { return value.Country == selectCountry; })[0];
-      o['x'] = 2018;
-      o['y'] = chinadata['HappinessScore'];
-      data.push(o);
+          var o = {};
+          iData = csv2018.filter(function(value, key) { return value.Country == name; })[0];
+          o['x'] = 2018;
+          o['y'] = iData['HappinessScore'];
 
+          iArr.push(o);
 
-
+          data.push(iArr);
+      }
+      console.log(data);
       //上面代码初始化数据
       //创造SVG
       var width = 320;
@@ -558,7 +645,7 @@
 
       var xAxisScale = d3.scaleBand()
           .range([0, (width - 50)])
-          .domain(data.map(function(element) { return element.x }))
+          .domain(data[0].map(function(element) { return element.x }))
           .paddingInner(1);
 
       var yAxisScale = d3.scaleLinear()
@@ -585,10 +672,14 @@
 
 
       //曲线盒子
-      var g = svg.append("g")
+      var linecharWrapper = svg.selectAll(".linecharWrapper")
+          .data(data)
+          .enter()
+          .append("g")
           .attr("class", "linecharWrapper");
+
       //上面代码创建坐标轴，下面绘画曲线
-      g.append("path")
+      linecharWrapper.append("path")
           .attr("class", "linechartArea")
           .attr("d", function(d, i) {
               var x0 = 20;
@@ -600,28 +691,32 @@
               var xScale = xAxisScale;
 
               var path = d3.path();
-              for (let i = 1; i < data.length; i++) {
+              for (let i = 1; i < d.length; i++) {
                   if (i == 1) {
-                      let x = x0 + xScale(data[i].x);
-                      let y = y0 - yScale(data[i].y);
+                      let x = x0 + xScale(d[i].x);
+                      let y = y0 - yScale(d[i].y);
                       path.moveTo(x, y);
                   } else {
-                      let x = x0 + xScale(data[i].x);
-                      let y = y0 - yScale(data[i].y);
+                      let x = x0 + xScale(d[i].x);
+                      let y = y0 - yScale(d[i].y);
                       path.lineTo(x, y);
                       path.moveTo(x, y);
                   }
               }
               return path.toString();
           })
-          .style("fill", function(d, i) { return '#ff5555'; });
+          .style("stroke", function(d, i) { return colors[i]; });
 
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //画雷达
   function drawCountryRadar() {
-      d3.select(".box-radar").select('.title').text("Data Affecting " + selectCountry + "'s Happiness");
+      if (selectCountries.length == 0) {
+          d3.select(".box-radar").select('.title').text("Data Affecting " + selectCountry + "'s Happiness");
+      } else {
+          d3.select(".box-radar").select('.title').text("Data Affecting " + "Some's Happiness");
+      }
       d3.select(".svg-radar").select("svg").remove();
       var radarconfig = {
           width: 320,
@@ -632,23 +727,35 @@
           labelFactor: 1.25,
           maxR: 120,
           strokeWidth: 2,
-          angleSlice: Math.PI * 2 / 5
+          angleSlice: Math.PI * 2 / 5,
+          colors: ["#5CACEE", "#FF8C00", "#FF4500", "#A020F0", "#B3EE3A"]
       }
       var allAxis = ['HappinessScore', 'Health', 'Freedom', 'Trust', 'Generosity'];
 
       ////创造数据
-      var chinadata = yearData.filter(function(value, key) {
-          return value.Country == selectCountry; //只选中国
-      })[0];
-      var data = [];
-      var arr = [];
-      for (let i in chinadata) {
-          if (!allAxis.includes(i)) continue;
-          let o = {};
-          o['axis'] = chinadata[i]; //即添加了key值也赋了value值 o[i] 相当于o.name 此时i为变量
-          arr.push(o);
+      var originData;
+      if (selectCountries.length != 0) {
+          originData = yearData.filter(function(value, key) {
+              return selectCountries.indexOf(value.Country) != -1;
+          });
+      } else {
+          originData = yearData.filter(function(value, key) {
+              return value.Country == selectCountry;
+          });
       }
-      data.push(arr);
+
+      var data = [];
+      for (var j = 0; j < originData.length; j++) {
+          var iData = originData[j];
+          var arr = [];
+          for (let i in iData) {
+              if (!allAxis.includes(i)) continue;
+              let o = {};
+              o['axis'] = iData[i]; //即添加了key值也赋了value值 o[i] 相当于o.name 此时i为变量
+              arr.push(o);
+          }
+          data.push(arr);
+      }
 
       //范围尺
       var rScale = d3.scaleLinear()
@@ -763,20 +870,44 @@
               }
               return path.toString();
           })
-          .style("fill", function(d, i) { return '#ff5555'; })
-          .style("fill-opacity", 0.7);
+          .style("fill", function(d, i) { return radarconfig.colors[i]; })
+          .style("fill-opacity", 0.9)
+          .on("mousemove", function(d, i) {
+              d3.selectAll(".radarArea").style("fill-opacity", 0.2);
+              d3.select(this).style("fill-opacity", 0.9);
+          })
+          .on("mouseout", function(d, i) {
+              d3.selectAll(".radarArea").style("fill-opacity", 0.9);
+          });
 
   }
   //显示国家排序
   function initCountryRank() {
-      console.log(selectCountry);
-      d3.select(".box-china").select('.title').text("//      " + selectCountry + " Happiness Rank" + "      //");
-      for (var i = 0; i < yearData.length; ++i) {
-          //获取国家名
-          var country = yearData[i].Country;
-          if (country == selectCountry) {
-              d3.select(".box-china").select('p').text(yearData[i].HappinessRank);
-              break;
+      if (selectCountries.length == 0) {
+          console.log(selectCountries.length);
+          d3.select(".box-china").select('.title').text("//      " + selectCountry + " Happiness Rank" + "      //");
+          for (var i = 0; i < yearData.length; ++i) {
+              //获取国家名
+              var country = yearData[i].Country;
+              if (country == selectCountry) {
+                  d3.select(".box-china").select('p').text(yearData[i].HappinessRank);
+                  break;
+              }
+          }
+      } else {
+          d3.select(".box-china").select('.title').text("//      " + "Some Countries Happiness Rank" + "      //");
+          d3.select(".box-china").select('p').text("");
+          for (var i = 0; i < yearData.length; ++i) {
+              //获取国家名
+              var country = yearData[i].Country;
+              if (selectCountries.indexOf(country) != -1) {
+                  if (d3.select(".box-china").select('p').text() == "") {
+                      d3.select(".box-china").select('p').text(yearData[i].HappinessRank);
+                  } else {
+                      d3.select(".box-china").select('p').text(d3.select(".box-china").select('p').text() + "," + yearData[i].HappinessRank);
+                  }
+
+              }
           }
       }
   }
@@ -860,6 +991,8 @@
           })
           .on("mouseout", function(d, i) {
               var value = d.properties.happinessScore;
+              if (selectCountries.indexOf(d.properties.name) != -1 ||
+                  (selectCountries.indexOf("United States") != -1 && d.properties.name == "United States of America")) return;
               if (value) {
                   d3.select(this).attr('fill', color(value));
               } else {
@@ -871,8 +1004,24 @@
           .on("click", function(d, i) {
               //点击事件
               if (d.properties.happinessScore == 0) return;
-              selectCountry = d.properties.name;
-              if (selectCountry == "United States of America") selectCountry = "United States";
+              var tempSelect = d.properties.name;
+              if (tempSelect == "United States of America") tempSelect = "United States";
+              if (isPressCtrl) {
+                  if (selectCountries.length < 5) {
+                      d3.select(this).attr('fill', 'rgba(255,99,71)');
+                      selectCountries.push(tempSelect);
+                      tempSelect = undefined;
+                  }
+              } else if (!isPressCtrl && selectCountries.length != 0) {
+                  selectCountries = [];
+                  drawMap();
+                  selectCountry = d.properties.name;
+                  if (selectCountry == "United States of America") selectCountry = "United States";
+              } else {
+                  selectCountries = [];
+                  selectCountry = d.properties.name;
+                  if (selectCountry == "United States of America") selectCountry = "United States";
+              }
               showCountryInfo();
           });
 

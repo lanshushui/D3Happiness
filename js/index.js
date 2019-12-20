@@ -106,31 +106,31 @@
       function drawColorTip() {
 
           d3.select(".countries-color-tip").select("svg").remove();
-          if(selectCountries.length==0) return;
+          if (selectCountries.length == 0) return;
           let svg = d3.select(".countries-color-tip")
               .append("svg")
               .attr("width", "260")
               .attr("height", 40)
-              .style("margin-top","10px")
+              .style("margin-top", "10px")
 
           svg.selectAll("rect")
               .data(selectCountries)
               .enter()
               .append("rect")
               .attr("x", function(d, i) {
-                  return i % 3 * 90 ;
+                  return i % 3 * 90;
               })
               .attr("y", function(d, i) {
-                  return parseInt(i / 3) * 20 +5;
+                  return parseInt(i / 3) * 20 + 5;
               })
               .attr("fill", function(d, i) {
                   return countriesColor[i];
               })
 
-              .attr("width", function(d,i) { //每个矩形的宽度 
+              .attr("width", function(d, i) { //每个矩形的宽度 
                   return 10;
               })
-              .attr("height", function(d,i) { //每个矩形的宽度 
+              .attr("height", function(d, i) { //每个矩形的宽度 
                   return 10;
               });
           svg.selectAll("text")
@@ -442,12 +442,19 @@
       function Region(country) {
           this.name = country.Region;
           this.value = getAttr(country);
+          this.maxValue = getAttr(country);
           this.sum = 1;
           this.countries = [country];
+          this.maxValueCountryName = country.Country;
           this.addCountry = function(country) {
+            if(getAttr(country)==0) return;
               this.countries.push(country);
               this.value = ((this.value * this.sum) + getAttr(country)) / (this.sum + 1);
               this.sum += 1;
+              if (this.maxValue < getAttr(country)) {
+                  this.maxValue = getAttr(country);
+                  this.maxValueCountryName = country.Country;
+              }
           }
       }
 
@@ -503,6 +510,18 @@
               })
               .attr("height", function(d) {
                   return height - 20 - yAxisScale(d.value) - 30; //设置每个条形的高度
+              });
+
+          var circles = svg.selectAll("circle");
+          circles.data(data, keys)
+              .transition()
+              .duration(500)
+              .ease(d3.easeLinear)
+              .attr("cx", function(d, i) {
+                  return xScale(i) + 12;
+              })
+              .attr("cy", function(d, i) {
+                  return yAxisScale(d.maxValue) + 30;
               });
           return;
       }
@@ -572,6 +591,40 @@
               d3.select(".tooltip").style('display', 'none');
           });
 
+      console.log(data);
+      var circleWrapper = svg.append("g")
+          .attr("class", "circleWrapper");
+
+      circleWrapper.selectAll("circle") //选择了空集
+          .data(data, keys) //绑定dataSet
+          .enter() //返回enter部分
+          .append("circle") //数据中每个值，添加p元素
+          .attr("cx", function(d, i) {
+              return xScale(i) + 12;
+          })
+          .attr("cy", function(d, i) {
+              return yAxisScale(d.maxValue) + 30;
+          })
+          .attr("fill", function(d) {
+              return colors[d.name];
+          })
+          .attr("r", 4)
+          .on("mousemove", function(d, i) {
+
+              d3.select(".tooltip").style('display', 'block');
+              d3.select(".tooltip").html('国家名： ' + d.maxValueCountryName + '<br/>' + '分数为' + d.maxValue.toFixed(2));
+
+              d3.select(this).attr('fill', 'rgba(255,99,71)');
+              d3.select(".tooltip").style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY) + "px")
+          })
+          .on("mouseout", function(d, i) {
+              d3.select(this).attr('fill', colors[d.name]);
+              d3.select(".tooltip").style('display', 'none');
+          });
+
+
+
   }
   //////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -632,7 +685,6 @@
 
           data.push(iArr);
       }
-      console.log(data);
       //上面代码初始化数据
       //创造SVG
       var width = 320;
@@ -727,8 +779,7 @@
           labelFactor: 1.25,
           maxR: 120,
           strokeWidth: 2,
-          angleSlice: Math.PI * 2 / 5,
-          colors: ["#5CACEE", "#FF8C00", "#FF4500", "#A020F0", "#B3EE3A"]
+          angleSlice: Math.PI * 2 / 5
       }
       var allAxis = ['HappinessScore', 'Health', 'Freedom', 'Trust', 'Generosity'];
 
@@ -738,6 +789,16 @@
           originData = yearData.filter(function(value, key) {
               return selectCountries.indexOf(value.Country) != -1;
           });
+          for (let i = 0; i < selectCountries.length; i++) {
+              for (let j = 0; j < originData.length; j++) {
+                  if (selectCountries[i] == originData[j].Country) {
+                      var temp = originData[i];
+                      originData[i] = originData[j];
+                      originData[j] = temp;
+                      break;
+                  }
+              }
+          }
       } else {
           originData = yearData.filter(function(value, key) {
               return value.Country == selectCountry;
@@ -754,9 +815,12 @@
               o['axis'] = iData[i]; //即添加了key值也赋了value值 o[i] 相当于o.name 此时i为变量
               arr.push(o);
           }
+          arr.color = countriesColor[j];
           data.push(arr);
       }
-
+      data.sort(function(a, b) {
+          return b[0].axis - a[0].axis;
+      });
       //范围尺
       var rScale = d3.scaleLinear()
           .range([0, radarconfig.maxR])
@@ -866,18 +930,21 @@
                       let x = d[i].axis * radarconfig.maxR * Math.cos(radarconfig.angleSlice * i - Math.PI / 2);
                       let y = d[i].axis * (radarconfig.maxR) * Math.sin(radarconfig.angleSlice * i - Math.PI / 2);
                       path.lineTo(x, y);
+
                   }
               }
+              path.closePath();
               return path.toString();
           })
-          .style("fill", function(d, i) { return radarconfig.colors[i]; })
+
+          .style("fill", function(d, i) { return d.color; })
           .style("fill-opacity", 0.9)
           .on("mousemove", function(d, i) {
-              d3.selectAll(".radarArea").style("fill-opacity", 0.2);
-              d3.select(this).style("fill-opacity", 0.9);
+              d3.selectAll(".radarArea").transition().duration(200).style("fill-opacity", 0.1);
+              d3.select(this).transition().duration(200).style("fill-opacity", 0.9);
           })
           .on("mouseout", function(d, i) {
-              d3.selectAll(".radarArea").style("fill-opacity", 0.9);
+              d3.selectAll(".radarArea").transition().duration(200).style("fill-opacity", 0.9);
           });
 
   }

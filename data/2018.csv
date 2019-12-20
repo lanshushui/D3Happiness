@@ -18,7 +18,7 @@ HappinessRank,Country,Region,HappinessScore,Economy,Social_Support,Health,Freedo
 17,Luxembourg,Europe,6.91,1.576,1.52,0.896,0.632,0.196,0.321,2.09
 18,United States,North America,6.886,1.398,1.471,0.819,0.547,0.291,0.133,2.36
 19,United Kingdom,Europe,6.814,1.301,1.559,0.883,0.533,0.354,0.272,2.184
-20,United Arab Emirates,Asia,6.774,2.096,0.776,0.67,0.284,0.186,n/a,n/a
+20,United Arab Emirates,Asia,6.774,2.096,0.776,0.67,0.284,0.186,0,0
 21,Czech Republic,Europe,6.711,1.233,1.489,0.854,0.543,0.064,0.034,2.528
 22,Malta,Europe,6.627,1.27,1.525,0.884,0.645,0.376,0.142,1.927
 23,France,Europe,6.489,1.293,1.466,0.908,0.52,0.098,0.176,2.204

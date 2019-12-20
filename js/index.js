@@ -447,7 +447,7 @@
           this.countries = [country];
           this.maxValueCountryName = country.Country;
           this.addCountry = function(country) {
-            if(getAttr(country)==0) return;
+              if (getAttr(country) == 0) return;
               this.countries.push(country);
               this.value = ((this.value * this.sum) + getAttr(country)) / (this.sum + 1);
               this.sum += 1;
@@ -964,20 +964,17 @@
       } else {
           d3.select(".box-china").select('.title').text("//      " + "Some Countries Happiness Rank" + "      //");
           d3.select(".box-china").select('p').text("");
-          for (var i = 0; i < yearData.length; ++i) {
-              //获取国家名
-              var country = yearData[i].Country;
-              if (selectCountries.indexOf(country) != -1) {
-                  if (d3.select(".box-china").select('p').text() == "") {
-                      d3.select(".box-china").select('p').text(yearData[i].HappinessRank);
-                  } else {
-                      d3.select(".box-china").select('p').text(d3.select(".box-china").select('p').text() + "," + yearData[i].HappinessRank);
-                  }
-
+          for (let j = 0; j < selectCountries.length; j++) {
+              var temp = yearData.filter(function(value, key) { return value.Country == selectCountries[j]; })[0];
+              if (d3.select(".box-china").select('p').text() == "") {
+                  d3.select(".box-china").select('p').text(temp.HappinessRank);
+              } else {
+                  d3.select(".box-china").select('p').text(d3.select(".box-china").select('p').text() + "," + temp.HappinessRank);
               }
           }
       }
   }
+  
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   
   //画地图函数
   function drawMap() {

@@ -3,14 +3,15 @@
   var csv2017;
   var csv2018;
   var mapjson;
-  var colors = []; //['#FAEBD7','#CD853F','#8EE5EE','#FFE4E1','#00BFFF','#C0FF3E','#FFF5EE','#FF7F24','#FFFF00','#7FFFD4'];
-  colors['Oceania'] = '#FAEBD7';
-  colors['Asia'] = '#00BFFF';
-  colors['South America'] = '#CD853F';
-  colors['Europe'] = '#FFE4E1';
-  colors['Africa'] = '#C0FF3E';
-  colors['North America'] = '#8EE5EE';
+  var regionColors = []; //['#FAEBD7','#CD853F','#8EE5EE','#FFE4E1','#00BFFF','#C0FF3E','#FFF5EE','#FF7F24','#FFFF00','#7FFFD4'];
+  regionColors['Oceania'] = '#FAEBD7';
+  regionColors['Asia'] = '#00BFFF';
+  regionColors['South America'] = '#CD853F';
+  regionColors['Europe'] = '#FFE4E1';
+  regionColors['Africa'] = '#C0FF3E';
+  regionColors['North America'] = '#8EE5EE';
   var countriesColor = ["#5CACEE", "#FF8C00", "#FF4500", "#A020F0", "#B3EE3A"];
+  var selectRegions = ['Oceania', 'Asia', 'South America', 'Europe', 'Africa', 'North America'];
   var yearData;
   var selectCountry = "China";
   var isPressCtrl = false;
@@ -18,6 +19,21 @@
   setKeyEventListener();
   loadData();
   initYearConsole();
+
+  Array.prototype.remove = function(obj) {
+      for (var i = 0; i < this.length; i++) {
+          var temp = this[i];
+          if (!isNaN(obj)) { //是数字
+              temp = i;
+          }
+          if (temp == obj) {
+              for (var j = i; j < this.length; j++) {
+                  this[j] = this[j + 1];
+              }
+              this.length = this.length - 1;
+          }
+      }
+  }
 
   function initYearConsole() {
       $(".year").click(function() {
@@ -175,6 +191,10 @@
   画散点图
   **/
   function drawScatterChart(value) {
+      function keys(d) {
+          return d.Country;
+      }
+
       function drawColorTip() {
           d3.select(".box-scatter").select("svg").remove();
           let svg = d3.select(".box-scatter")
@@ -183,7 +203,8 @@
               .attr("width", "260")
               .attr("height", 40);
           var i = 0;
-          for (var index in colors) {
+
+          for (var index in regionColors) {
 
               svg.append("circle")
                   .attr("cx", function(d) {
@@ -193,9 +214,26 @@
                       return parseInt(i / 3) * 20 + 10;
                   })
                   .attr("fill", function(d) {
-                      return colors[index];
+                      if (selectRegions.indexOf(index) != -1) {
+                          return regionColors[index];
+                      } else {
+                          return "black";
+                      }
                   })
-                  .attr("r", 5);
+                  .attr("r", 5)
+                  .attr("data", index)
+                  .on("click", function(d, i) {
+                      //点击事件
+                      var name = d3.select(this).attr("data");
+                      if (selectRegions.indexOf(name) != -1) {
+                          selectRegions.remove(name);
+                          d3.select(this).attr("fill", "black");
+                      } else {
+                          selectRegions.push(name);
+                          d3.select(this).attr("fill", regionColors[name]);
+                      }
+                      drawScatterChart(value);
+                  });
 
               svg.append("text")
                   .attr("x", i % 3 * 60 + 30)
@@ -227,26 +265,33 @@
       drawColorTip();
       var width = 600;
       var height = 400;
-      var data = yearData;
-
-      d3.select(".svg-scatterWrapper").select("svg").remove();
-      var svg = d3.select(".svg-scatterWrapper")
-          .append("svg")
-          .attr("width", width)
-          .attr("height", height + 40)
-          .attr("class", "svg-scatter");
+      var data = yearData.filter(function(value, key) { return selectRegions.indexOf(value.Region) != -1 });
 
 
+      var scatterWrapper = d3.select(".svg-scatterWrapper");
+
+      var svg;
+
+      if ($(".svg-scatterWrapper svg").length != 0) {
+          svg = scatterWrapper.select("svg");
+          svg.select(".axis").remove();
+          svg.select(".xTitle").remove();
+      } else {
+          svg = scatterWrapper.append("svg")
+              .attr("width", width)
+              .attr("height", height + 40)
+              .attr("class", "svg-scatter");
+      }
       var xAxisScale = d3.scaleLinear()
           .domain([0, d3.max(data, function(d) { return parseFloat(getXAttr(d)); })])
           .range([0, (width - 60)]); //设置输出范围 
 
+      var xAxis = d3.axisBottom()
+          .scale(xAxisScale);
+
       var yAxisScale = d3.scaleLinear()
           .domain([10, 0])
           .range([0, (height - 70)]); //设置输出范围     
-
-      var xAxis = d3.axisBottom()
-          .scale(xAxisScale);
 
 
       var yAxis = d3.axisLeft()
@@ -266,6 +311,7 @@
       var xText = svg.append("text")
           .attr("x", "290")
           .attr("y", "410")
+          .attr("class", "xTitle")
           .text(getXTitle())
           .style("letter-spacing", "5px");
 
@@ -273,29 +319,18 @@
           .attr("x", "150")
           .attr("y", "-10")
           .text("幸福分数")
+          .attr("class", "yTitle")
           .attr("transform", "rotate(90)")
           .style("letter-spacing", "5px");
 
-      var bubbleWrapper = svg.append("g").attr("class", "bubbleWrapper");
+
+      var circles = svg.selectAll("circle").data(data, keys);
 
 
 
-      bubbleWrapper.selectAll("circle")
-          .data(data, function(d) {
-              return d.Country;
-          })
-          .enter()
+      circles.enter()
           .append("circle")
-          .attr("cx", function(d) {
-              return xAxisScale(getXAttr(d)) + 50;
-          })
-          .attr("cy", function(d) {
-              return yAxisScale(d.HappinessScore) + 30;
-          })
-          .attr("fill", function(d) {
-              return colors[d.Region];
-          })
-          .attr("r", 5)
+          .merge(circles) //整合已存在的circle
           .on("mousemove", function(d, i) {
 
               d3.select(".tooltip").style('display', 'block');
@@ -307,9 +342,37 @@
                   .style("top", (d3.event.pageY) + "px")
           })
           .on("mouseout", function(d, i) {
-              d3.select(this).attr('fill', colors[d.Region]);
+              d3.select(this).attr('fill', regionColors[d.Region]);
               d3.select(".tooltip").style('display', 'none');
-          });
+          })
+          .transition()
+          .duration(500)
+          .ease(d3.easeLinear)
+          .attr("cx", function(d) {
+              return xAxisScale(getXAttr(d)) + 50;
+          })
+          .attr("cy", function(d) {
+              return yAxisScale(d.HappinessScore) + 30;
+          })
+          .attr("fill", function(d) {
+              return regionColors[d.Region];
+          })
+          .attr("r", 5)
+
+
+      circles.exit()
+          .transition()
+          .duration(500)
+          .ease(d3.easeLinear)
+          .attr("cx", function(d) {
+              return 0;
+          })
+          .style("opacity",0)
+          .attr("cy", function(d) {
+              return 0;
+          }) .remove();
+
+
   }
   //////////////////////////////////////////////////////////////////////////////////////////////////
   /**
@@ -562,7 +625,7 @@
           .enter() //返回enter部分
           .append("rect") //数据中每个值，添加p元素
           .attr("fill", function(d, i) {
-              return colors[d.name];
+              return regionColors[d.name];
           }) //设置颜色
           .attr("x", function(d, i) {
 
@@ -587,11 +650,11 @@
                   .style("top", (d3.event.pageY) + "px")
           })
           .on("mouseout", function(d, i) {
-              d3.select(this).attr('fill', colors[d.name]);
+              d3.select(this).attr('fill', regionColors[d.name]);
               d3.select(".tooltip").style('display', 'none');
           });
 
-      console.log(data);
+
       var circleWrapper = svg.append("g")
           .attr("class", "circleWrapper");
 
@@ -606,7 +669,7 @@
               return yAxisScale(d.maxValue) + 30;
           })
           .attr("fill", function(d) {
-              return colors[d.name];
+              return regionColors[d.name];
           })
           .attr("r", 4)
           .on("mousemove", function(d, i) {
@@ -622,9 +685,6 @@
               d3.select(this).attr('fill', colors[d.name]);
               d3.select(".tooltip").style('display', 'none');
           });
-
-
-
   }
   //////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -682,7 +742,7 @@
           o['y'] = iData['HappinessScore'];
 
           iArr.push(o);
-          iArr.name=name;
+          iArr.name = name;
           data.push(iArr);
       }
       //上面代码初始化数据
@@ -760,7 +820,7 @@
           .style("stroke", function(d, i) { return colors[i]; })
           .style("stroke-width", 3)
           .on("mousemove", function(d, i) {
-              
+
 
               d3.select(".tooltip").style('display', 'block');
               d3.select(".tooltip").html('国家名： ' + d.name);

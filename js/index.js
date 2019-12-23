@@ -682,7 +682,7 @@
           o['y'] = iData['HappinessScore'];
 
           iArr.push(o);
-
+          iArr.name=name;
           data.push(iArr);
       }
       //上面代码初始化数据
@@ -757,7 +757,20 @@
               }
               return path.toString();
           })
-          .style("stroke", function(d, i) { return colors[i]; });
+          .style("stroke", function(d, i) { return colors[i]; })
+          .style("stroke-width", 3)
+          .on("mousemove", function(d, i) {
+              
+
+              d3.select(".tooltip").style('display', 'block');
+              d3.select(".tooltip").html('国家名： ' + d.name);
+
+              d3.select(".tooltip").style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY) + "px")
+          })
+          .on("mouseout", function(d, i) {
+              d3.select(".tooltip").style('display', 'none');
+          });
 
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -974,7 +987,7 @@
           }
       }
   }
-  
+
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   
   //画地图函数
   function drawMap() {

@@ -187,6 +187,13 @@
    上述JS代码是加载数据，start函数开始可视化操作
    */
 
+
+
+  function drawCircularPartiton() {
+      var data;
+
+
+  }
   /**
   画散点图
   **/
@@ -367,10 +374,10 @@
           .attr("cx", function(d) {
               return 0;
           })
-          .style("opacity",0)
+          .style("opacity", 0)
           .attr("cy", function(d) {
               return 0;
-          }) .remove();
+          }).remove();
 
 
   }
@@ -697,7 +704,7 @@
           d3.select(".box-linechart").select('.title').text("Happiness Scores of Some");
       }
 
-      var svg = d3.select(".svg-linechart").select("svg").remove();
+
 
       var colors = ["#5CACEE", "#FF8C00", "#FF4500", "#A020F0", "#B3EE3A"];
       var originData = [];
@@ -747,13 +754,10 @@
       }
       //上面代码初始化数据
       //创造SVG
+      var svg;
+
       var width = 320;
       var height = 320;
-      var svg = d3.select(".svg-linechart")
-          .append("svg")
-          .attr("width", width)
-          .attr("height", height)
-          .attr("class", "line-chart");
 
       var xAxisScale = d3.scaleBand()
           .range([0, (width - 50)])
@@ -762,36 +766,77 @@
 
       var yAxisScale = d3.scaleLinear()
           .domain([10, 0])
-          .range([0, (height - 50)]); //设置输出范围     
+          .range([0, (height - 50)]); //设置输出范围    
+      if ($(".svg-linechart svg").length == 0) {
 
-      var xAxis = d3.axisBottom()
-          .scale(xAxisScale);
+          svg = d3.select(".svg-linechart")
+              .append("svg")
+              .attr("width", width)
+              .attr("height", height)
+              .attr("class", "line-chart");
 
 
-      var yAxis = d3.axisLeft()
-          .scale(yAxisScale);
+          var xAxis = d3.axisBottom()
+              .scale(xAxisScale);
 
-      svg.append("g") // 分组（group）元素
-          .call(xAxis) // 在g元素上利用call函数调用xAxis
-          .attr("class", "axis")
-          .attr("transform", "translate(" + 20 + "," + (height - 20) + ")");
 
-      // 调用y轴
-      svg.append("g") // 分组（group）元素
-          .call(yAxis) // 在g元素上利用call函数调用xAxis
-          .attr("class", "yxis")
-          .attr("transform", "translate(" + 20 + "," + 30 + ")");
+          var yAxis = d3.axisLeft()
+              .scale(yAxisScale);
 
+          svg.append("g") // 分组（group）元素
+              .call(xAxis) // 在g元素上利用call函数调用xAxis
+              .attr("class", "axis")
+              .attr("transform", "translate(" + 20 + "," + (height - 20) + ")");
+
+          // 调用y轴
+          svg.append("g") // 分组（group）元素
+              .call(yAxis) // 在g元素上利用call函数调用xAxis
+              .attr("class", "yxis")
+              .attr("transform", "translate(" + 20 + "," + 30 + ")");
+
+      } else {
+          svg = d3.select(".svg-linechart").select("svg");
+      }
 
       //曲线盒子
-      var linecharWrapper = svg.selectAll(".linecharWrapper")
-          .data(data)
-          .enter()
-          .append("g")
-          .attr("class", "linecharWrapper");
+      var linecharWrappers = svg.selectAll(".linecharWrapper").data(data);
+
+      linecharWrappers.select("path")
+          .transition()
+          .duration(500)
+          .ease(d3.easeLinear)
+          .attr("d", function(d, i) {
+              var x0 = 20;
+              var y0 = height - 20;
+
+              var yScale = d3.scaleLinear()
+                  .domain([0, 10])
+                  .range([0, (height - 50)]);
+              var xScale = xAxisScale;
+
+              var path = d3.path();
+              for (let i = 1; i < d.length; i++) {
+                  if (i == 1) {
+                      let x = x0 + xScale(d[i].x);
+                      let y = y0 - yScale(d[i].y);
+                      path.moveTo(x, y);
+                  } else {
+                      let x = x0 + xScale(d[i].x);
+                      let y = y0 - yScale(d[i].y);
+                      path.lineTo(x, y);
+                      path.moveTo(x, y);
+                  }
+              }
+              return path.toString();
+          })
+          .style("stroke", function(d, i) { return colors[i]; });
+
 
       //上面代码创建坐标轴，下面绘画曲线
-      linecharWrapper.append("path")
+      linecharWrappers.enter()
+          .append("g")
+          .attr("class","linecharWrapper")
+          .append("path")
           .attr("class", "linechartArea")
           .attr("d", function(d, i) {
               var x0 = 20;
@@ -820,8 +865,6 @@
           .style("stroke", function(d, i) { return colors[i]; })
           .style("stroke-width", 3)
           .on("mousemove", function(d, i) {
-
-
               d3.select(".tooltip").style('display', 'block');
               d3.select(".tooltip").html('国家名： ' + d.name);
 
@@ -831,7 +874,7 @@
           .on("mouseout", function(d, i) {
               d3.select(".tooltip").style('display', 'none');
           });
-
+      linecharWrappers.exit().remove();
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -842,7 +885,7 @@
       } else {
           d3.select(".box-radar").select('.title').text("Data Affecting " + "Some's Happiness");
       }
-      d3.select(".svg-radar").select("svg").remove();
+
       var radarconfig = {
           width: 320,
           height: 320,
@@ -899,100 +942,102 @@
           .range([0, radarconfig.maxR])
           .domain([0, 1]);
 
-
-      //创造SVG
-      var width = radarconfig.width;
-      var height = radarconfig.height;
-      var svg = d3.select(".svg-radar")
-          .append("svg")
-          .attr("width", width)
-          .attr("height", height)
-          .attr("class", "china-radar");
-      //雷达的区域
-      var g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + width / 2 + ")");
-
-
-      //这段加上下面一段代码才会出现同心圆
-      var filter = g.append('defs').append('filter').attr('id', 'glow'),
-          feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur'),
-          feMerge = filter.append('feMerge'),
-          feMergeNode_1 = feMerge.append('feMergeNode').attr('in', 'coloredBlur'),
-          feMergeNode_2 = feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
-
-      //背景坐标svg
-      var axisGrid = g.append("g").attr("class", "axisWrapper");
-
-      axisGrid.selectAll(".levels")
-          .data(d3.range(1, radarconfig.levels + 1).reverse())
-          .enter()
-          .append("circle")
-          .attr("class", "gridCircle")
-          .attr("r", function(d, i) { return radarconfig.maxR / radarconfig.levels * d; })
-          .style("fill", "#CDCDCD")
-          .style("stroke", "#CDCDCD")
-          .style("fill-opacity", radarconfig.fill_opacity)
-          .style("filter", "url(#glow)");
-
-      //上面两端代码出现圆形背景
-      /////
-      /////
-      //出现百分比文字
-      axisGrid.selectAll(".axisLabel")
-          .data(d3.range(1, radarconfig.levels + 1).reverse())
-          .enter().append("text")
-          .attr("class", "axisLabel")
-          .attr("x", 0)
-          .attr("y", function(d) { return -d * radarconfig.maxR / radarconfig.levels; })
-          .attr("dy", "0.4em")
-          .style("font-size", "10px")
-          .attr("fill", "#ffffffaa")
-          .text(function(d, i) {
-              return 100 * d / radarconfig.levels + "%";
-          });
-
-      //每个元素的父盒子
-      var axis = axisGrid.selectAll(".axis")
-          .data(allAxis)
-          .enter()
-          .append("g")
-          .attr("class", "axis");
-      //每个轴的线
-      axis.append("line")
-          .attr("x1", 0)
-          .attr("y1", 0)
-          .attr("x2", function(d, i) { return radarconfig.maxR * Math.cos(radarconfig.angleSlice * i - Math.PI / 2); })
-          .attr("y2", function(d, i) { return radarconfig.maxR * Math.sin(radarconfig.angleSlice * i - Math.PI / 2); })
-          .attr("class", "line")
-          .style("stroke", "#ffffffaa")
-          .style("stroke-width", "1px");
-
-      //每个轴的名字
-      axis.append("text")
-          .attr("class", "legend")
-          .style("font-size", "10px")
-          .attr("text-anchor", "middle")
-          .attr("dy", "0em")
-          .attr('fill', "#ffffffaa")
-          .attr("x", function(d, i) { return (radarconfig.maxR + 10) * Math.cos(radarconfig.angleSlice * i - Math.PI / 2); })
-          .attr("y", function(d, i) { return (radarconfig.maxR + 20) * Math.sin(radarconfig.angleSlice * i - Math.PI / 2); })
-          .text(function(d) { return d });
-
-      //显示数据图
+      var svg;
+      var g;
+      if ($(".svg-radar svg").length == 0) {
+          //创造SVG
+          var width = radarconfig.width;
+          var height = radarconfig.height;
+          svg = d3.select(".svg-radar")
+              .append("svg")
+              .attr("width", width)
+              .attr("height", height)
+              .attr("class", "china-radar");
+          //雷达的区域
+          g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + width / 2 + ")");
 
 
+          //这段加上下面一段代码才会出现同心圆
+          var filter = g.append('defs').append('filter').attr('id', 'glow'),
+              feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur'),
+              feMerge = filter.append('feMerge'),
+              feMergeNode_1 = feMerge.append('feMergeNode').attr('in', 'coloredBlur'),
+              feMergeNode_2 = feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+          //背景坐标svg
+          var axisGrid = g.append("g").attr("class", "axisWrapper");
+
+          axisGrid.selectAll(".levels")
+              .data(d3.range(1, radarconfig.levels + 1).reverse())
+              .enter()
+              .append("circle")
+              .attr("class", "gridCircle")
+              .attr("r", function(d, i) { return radarconfig.maxR / radarconfig.levels * d; })
+              .style("fill", "#CDCDCD")
+              .style("stroke", "#CDCDCD")
+              .style("fill-opacity", radarconfig.fill_opacity)
+              .style("filter", "url(#glow)");
+
+          //上面两端代码出现圆形背景
+          /////
+          /////
+          //出现百分比文字
+          axisGrid.selectAll(".axisLabel")
+              .data(d3.range(1, radarconfig.levels + 1).reverse())
+              .enter().append("text")
+              .attr("class", "axisLabel")
+              .attr("x", 0)
+              .attr("y", function(d) { return -d * radarconfig.maxR / radarconfig.levels; })
+              .attr("dy", "0.4em")
+              .style("font-size", "10px")
+              .attr("fill", "#ffffffaa")
+              .text(function(d, i) {
+                  return 100 * d / radarconfig.levels + "%";
+              });
+
+          //每个元素的父盒子
+          var axis = axisGrid.selectAll(".axis")
+              .data(allAxis)
+              .enter()
+              .append("g")
+              .attr("class", "axis");
+          //每个轴的线
+          axis.append("line")
+              .attr("x1", 0)
+              .attr("y1", 0)
+              .attr("x2", function(d, i) { return radarconfig.maxR * Math.cos(radarconfig.angleSlice * i - Math.PI / 2); })
+              .attr("y2", function(d, i) { return radarconfig.maxR * Math.sin(radarconfig.angleSlice * i - Math.PI / 2); })
+              .attr("class", "line")
+              .style("stroke", "#ffffffaa")
+              .style("stroke-width", "1px");
+
+          //每个轴的名字
+          axis.append("text")
+              .attr("class", "legend")
+              .style("font-size", "10px")
+              .attr("text-anchor", "middle")
+              .attr("dy", "0em")
+              .attr('fill', "#ffffffaa")
+              .attr("x", function(d, i) { return (radarconfig.maxR + 10) * Math.cos(radarconfig.angleSlice * i - Math.PI / 2); })
+              .attr("y", function(d, i) { return (radarconfig.maxR + 20) * Math.sin(radarconfig.angleSlice * i - Math.PI / 2); })
+              .text(function(d) { return d });
+
+          //显示数据图
+
+      } else {
+          svg = d3.select(".svg-radar").select("svg");
+          g = svg.select("g");
+      }
 
       //Create a wrapper for the blobs  
-      var blobWrapper = g.selectAll(".radarWrapper")
-          .data(data)
-          .enter()
-          .append("g")
-          .attr("class", "radarWrapper");
+      var blobWrappers = g.selectAll(".radarWrapper").data(data);
 
-      //Append the backgrounds  
-      blobWrapper
-          .append("path")
-          .attr("class", "radarArea")
+      blobWrappers.select("path").style("fill", function(d, i) { return d.color; })
+          .transition()
+          .duration(500)
+          .ease(d3.easeLinear)
           .attr("d", function(d, i) {
+              console.log("dsfsdfasd");
               var path = d3.path();
               for (let i = 0; i < d.length; i++) {
                   if (i == 0) {
@@ -1008,8 +1053,13 @@
               }
               path.closePath();
               return path.toString();
-          })
+          });
 
+      blobWrappers.enter()
+          .append("g")
+          .attr("class", "radarWrapper")
+          .append("path")
+          .attr("class", "radarArea")
           .style("fill", function(d, i) { return d.color; })
           .style("fill-opacity", 0.9)
           .on("mousemove", function(d, i) {
@@ -1018,7 +1068,28 @@
           })
           .on("mouseout", function(d, i) {
               d3.selectAll(".radarArea").transition().duration(200).style("fill-opacity", 0.9);
+          })
+          .attr("d", function(d, i) {
+              console.log("dsfsdssssssssssssssssssfasd");
+              var path = d3.path();
+              for (let i = 0; i < d.length; i++) {
+                  if (i == 0) {
+                      let x = d[i].axis / 10 * radarconfig.maxR * Math.cos(radarconfig.angleSlice * i - Math.PI / 2);
+                      let y = d[i].axis / 10 * (radarconfig.maxR) * Math.sin(radarconfig.angleSlice * i - Math.PI / 2);
+                      path.moveTo(x, y);
+                  } else {
+                      let x = d[i].axis * radarconfig.maxR * Math.cos(radarconfig.angleSlice * i - Math.PI / 2);
+                      let y = d[i].axis * (radarconfig.maxR) * Math.sin(radarconfig.angleSlice * i - Math.PI / 2);
+                      path.lineTo(x, y);
+
+                  }
+              }
+              path.closePath();
+              return path.toString();
           });
+
+
+      blobWrappers.exit().remove();
 
   }
   //显示国家排序

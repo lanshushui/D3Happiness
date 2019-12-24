@@ -29,7 +29,7 @@
 }
 .tooltip{
     position: absolute;
-    width: 120px;
+    width: auto;
     height: auto;
     pointer-events: none; 
     border-radius:5px;
@@ -150,7 +150,7 @@
     color: white;
 }
 
-.box-bar>.title{
+.box-pie>.title{
     width: 96%;
     height: 40px;
     line-height: 40px;
@@ -160,6 +160,11 @@
     margin: auto;   
     margin-top: 20px;
     color: white;
+}
+.svg-pie{
+    display: block;
+    margin: 0 auto;
+    margin-top: 20px;
 }
 .reigon-bar-div path,.reigon-bar-div line,.reigon-bar-div text{
     stroke: white;

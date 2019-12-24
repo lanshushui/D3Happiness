@@ -189,8 +189,157 @@
 
 
 
-  function drawCircularPartiton() {
-      var data;
+  //画饼状图
+  function drawPie(originData, getAttr) {
+      d3.select(".box-pie").select("svg").remove();
+
+      function Region(country) {
+          this.name = country.Region;
+          this.avgValue = parseFloat(getAttr(country));
+          this.num = 1;
+          this.sum = yearData.filter(function(value, key) { return value.Region == country.Region }).length;
+          this.countries = [country];
+          this.addCountry = function(country) {
+              this.countries.push(country);
+              this.avgValue = ((this.avgValue * this.num) + parseFloat(getAttr(country))) / (this.num + 1);
+              this.num += 1;
+          }
+      }
+      var data = [];
+      for (let i = 0; i < originData.length; i++) {
+          var country = originData[i];
+          var flag = false;
+          for (let j = 0; j < data.length; j++) {
+              if (data[j].name == country.Region) {
+                  data[j].addCountry(country);
+                  flag = true;
+                  break;
+              }
+          }
+          if (!flag) {
+              data.push(new Region(country));
+          }
+      }
+      data.sort(function(val1, val2) {
+          return val2.num - val1.num;
+      });
+      if (data.length == 0) return;
+      //上面代码初始化数据
+      var width = 300;
+      var height = 300;
+      var innerR = 50;
+      var outterR = innerR + 90;
+      var svg = d3.select(".box-pie")
+          .append("svg")
+          .attr("width", width)
+          .attr("height", height)
+          .attr("class", "svg-pie");
+
+
+
+      var pie = d3.pie()
+          .sort(null)
+          .value(function(d) {
+              return d.num;
+          });
+      var pieData = pie(data);
+
+      var bg = svg.append("g").attr("class", "bgWrapper");
+      bg.append("circle")
+          .attr("cx", width / 2)
+          .attr("cy", height / 2)
+          .attr("stroke", "white")
+          .attr("fill", "transparent")
+          .attr("r", innerR)
+          .style("pointer-events", "none");
+      bg.append("circle")
+          .attr("cx", width / 2)
+          .attr("cy", height / 2)
+          .attr("stroke", "white")
+          .attr("fill", "transparent")
+          .attr("r", outterR)
+          .style("pointer-events", "none");
+
+      if (pieData.length == 1) return;
+
+      bg.selectAll("path")
+          .data(pieData)
+          .enter()
+          .append("path")
+          .attr("d", function(d, i) {
+
+              var path = d3.path();
+
+              var x0 = width / 2;
+              var y0 = height / 2;
+
+              var x1 = x0 + Math.sin(d.startAngle) * innerR;
+              var y1 = y0 - Math.cos(d.startAngle) * innerR;
+              path.moveTo(x1, y1);
+
+              var x2 = x0 + Math.sin(d.startAngle) * outterR;
+              var y2 = y0 - Math.cos(d.startAngle) * outterR;
+
+              path.lineTo(x2, y2);
+              return path.toString();
+          })
+          .style("stroke", "white")
+          .style("stroke-width", 1);
+
+      bg.append("text")
+          .attr("x", width / 2 - 15)
+          .attr("y", height / 2 + 5)
+          .attr("class", "Proportion")
+          .attr("stroke", "white")
+          .text(parseInt(pieData[0].data.num / originData.length * 100) + "%");
+
+
+      var pieWrapper = svg.append("g").attr("class", "pieWrapper");
+      var arcs = pieWrapper.selectAll("g")
+          .data(pieData)
+          .enter()
+          .append("g")
+          .attr("class", "arc")
+          .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
+
+
+      arcs.append("path")
+          .attr("fill", function(d, i) {
+              return regionColors[data[i].name];
+          })
+          .attr("d", function(d) {
+
+              var v = d.data;
+              var r = (outterR - innerR) * v.num / v.sum;
+              var arc = d3.arc()
+                  .innerRadius(innerR)
+                  .outerRadius(innerR + r);
+              return arc(d);
+          })
+          .attr("stroke", "white")
+          .on("mousemove", function(d, i) {
+              bg.select(".Proportion").remove();
+              bg.append("text")
+                  .attr("x", width / 2 - 15)
+                  .attr("y", height / 2 + 5)
+                  .attr("class", "Proportion")
+                  .attr("stroke", "white")
+                  .text(parseInt(d.data.num / originData.length * 100) + "%");
+
+              d3.select(".tooltip").style('display', 'block');
+              d3.select(".tooltip").html('占' + d.data.name + '比重为' + (d.data.num / d.data.sum).toFixed(2));
+
+              d3.select(this).attr('fill', 'rgba(255,99,71)');
+              d3.select(".tooltip").style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY) + "px");
+
+
+          })
+          .on("mouseout", function(d, i) {
+              d3.select(this).attr('fill', regionColors[d.data.name]);
+              d3.select(".tooltip").style('display', 'none');
+          });
+
 
 
   }
@@ -278,9 +427,11 @@
       var scatterWrapper = d3.select(".svg-scatterWrapper");
 
       var svg;
-
+      var circlesWrapper;
       if ($(".svg-scatterWrapper svg").length != 0) {
           svg = scatterWrapper.select("svg");
+          circlesWrapper = svg.select(".circlesWrapper");
+
           svg.select(".axis").remove();
           svg.select(".xTitle").remove();
       } else {
@@ -288,6 +439,8 @@
               .attr("width", width)
               .attr("height", height + 40)
               .attr("class", "svg-scatter");
+          circlesWrapper = svg.append("g").attr("class", "circlesWrapper");
+
       }
       var xAxisScale = d3.scaleLinear()
           .domain([0, d3.max(data, function(d) { return parseFloat(getXAttr(d)); })])
@@ -330,8 +483,29 @@
           .attr("transform", "rotate(90)")
           .style("letter-spacing", "5px");
 
+      circlesWrapper
+          .call(d3.brush() // Add the brush feature using the d3.brush function
+              .extent([
+                  [50, 30],
+                  [width, height - 40]
+              ]) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+              .on("start brush", function() {
+                  var extent = d3.event.selection;
+                  var x0 = extent[0][0],
+                      x1 = extent[1][0],
+                      y0 = extent[0][1],
+                      y1 = extent[1][1];
+                  var selectData = data.filter(function(value, key) {
+                      cx = xAxisScale(getXAttr(value)) + 50;
+                      cy = yAxisScale(value.HappinessScore) + 30;
+                      return x0 <= cx && cx <= x1 && y0 <= cy && cy <= y1;
+                  });
+                  drawPie(selectData, getXAttr);
 
-      var circles = svg.selectAll("circle").data(data, keys);
+              }) // Each time the brush selection changes, trigger the 'updateChart' function
+          )
+
+      var circles = circlesWrapper.selectAll("circle").data(data, keys);
 
 
 
@@ -378,7 +552,6 @@
           .attr("cy", function(d) {
               return 0;
           }).remove();
-
 
   }
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -689,7 +862,7 @@
                   .style("top", (d3.event.pageY) + "px")
           })
           .on("mouseout", function(d, i) {
-              d3.select(this).attr('fill', colors[d.name]);
+              d3.select(this).attr('fill', regionColors[d.name]);
               d3.select(".tooltip").style('display', 'none');
           });
   }
@@ -835,7 +1008,7 @@
       //上面代码创建坐标轴，下面绘画曲线
       linecharWrappers.enter()
           .append("g")
-          .attr("class","linecharWrapper")
+          .attr("class", "linecharWrapper")
           .append("path")
           .attr("class", "linechartArea")
           .attr("d", function(d, i) {
@@ -1070,7 +1243,6 @@
               d3.selectAll(".radarArea").transition().duration(200).style("fill-opacity", 0.9);
           })
           .attr("d", function(d, i) {
-              console.log("dsfsdssssssssssssssssssfasd");
               var path = d3.path();
               for (let i = 0; i < d.length; i++) {
                   if (i == 0) {
@@ -1095,7 +1267,6 @@
   //显示国家排序
   function initCountryRank() {
       if (selectCountries.length == 0) {
-          console.log(selectCountries.length);
           d3.select(".box-china").select('.title').text("//      " + selectCountry + " Happiness Rank" + "      //");
           for (var i = 0; i < yearData.length; ++i) {
               //获取国家名

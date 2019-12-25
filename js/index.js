@@ -260,31 +260,32 @@
           .attr("r", outterR)
           .style("pointer-events", "none");
 
-      if (pieData.length == 1) return;
+      if (pieData.length!= 1){
 
-      bg.selectAll("path")
-          .data(pieData)
-          .enter()
-          .append("path")
-          .attr("d", function(d, i) {
+          bg.selectAll("path")
+              .data(pieData)
+              .enter()
+              .append("path")
+              .attr("d", function(d, i) {
 
-              var path = d3.path();
+                  var path = d3.path();
 
-              var x0 = width / 2;
-              var y0 = height / 2;
+                  var x0 = width / 2;
+                  var y0 = height / 2;
 
-              var x1 = x0 + Math.sin(d.startAngle) * innerR;
-              var y1 = y0 - Math.cos(d.startAngle) * innerR;
-              path.moveTo(x1, y1);
+                  var x1 = x0 + Math.sin(d.startAngle) * innerR;
+                  var y1 = y0 - Math.cos(d.startAngle) * innerR;
+                  path.moveTo(x1, y1);
 
-              var x2 = x0 + Math.sin(d.startAngle) * outterR;
-              var y2 = y0 - Math.cos(d.startAngle) * outterR;
+                  var x2 = x0 + Math.sin(d.startAngle) * outterR;
+                  var y2 = y0 - Math.cos(d.startAngle) * outterR;
 
-              path.lineTo(x2, y2);
-              return path.toString();
-          })
-          .style("stroke", "white")
-          .style("stroke-width", 1);
+                  path.lineTo(x2, y2);
+                  return path.toString();
+              })
+              .style("stroke", "white")
+              .style("stroke-width", 1);
+      }
 
       bg.append("text")
           .attr("x", width / 2 - 15)

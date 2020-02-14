@@ -556,107 +556,7 @@
 
   }
   //////////////////////////////////////////////////////////////////////////////////////////////////
-  /**
-   画条形图
-  **/
-  function drawBar(countries, color) {
-      d3.select(".bar-chart").remove();
-      var data = countries.slice(0, 10);
-      data.sort(function(val1, val2) {
-          return val2.HappinessScore - val1.HappinessScore;
-      });
-      //生成对应数据
-      //生成svg
-      var width = 300;
-      var height = data.length * 35 + 30;
-      var svg = d3.select(".svg-bar")
-          .append("svg")
-          .attr("width", "100%")
-          .attr("height", height + 40)
-          .attr("class", "bar-chart");
-
-      var xAxisScale = d3.scaleLinear()
-          .domain([0, 10])
-          .range([0, (width - 50)]); //设置输出范围 
-
-      var yAxisScale = d3.scaleBand()
-          .domain(data.map(function(element) { return element.Country }))
-          .range([0, (height)])
-          .paddingInner(1)
-          .paddingOuter(1);
-
-      var xAxis = d3.axisTop()
-          .scale(xAxisScale);
-
-      var yAxis = d3.axisLeft()
-          .scale(yAxisScale);
-
-      svg.append("g") // 分组（group）元素
-          .call(xAxis) // 在g元素上利用call函数调用xAxis
-          .attr("class", "axis")
-          .attr("transform", "translate(" + 45 + "," + 30 + ")");
-
-      // 调用y轴
-      svg.append("g") // 分组（group）元素
-          .call(yAxis) // 在g元素上利用call函数调用xAxis
-          .attr("class", "yxis")
-          .attr("transform", "translate(" + 45 + "," + 30 + ")");
-
-      svg.select(".yxis")
-          .selectAll("text")
-          .attr("font-size", "7")
-          .attr("fill", "white")
-          .style("stroke-width", "1");
-      svg.select(".axis")
-          .selectAll("text")
-          .attr("font-size", "10")
-          .attr("fill", "white")
-          .style("stroke-width", "1");
-      //上面生成坐标轴
-
-      var yScale = d3.scaleBand()
-          .domain(d3.range(data.length))
-          .range([0, height])
-          .paddingInner(1)
-          .paddingOuter(1);
-
-
-      var barWrapper = svg.append("g")
-          .attr("class", "barWrapper");
-
-
-      barWrapper.selectAll("rect") //选择了空集
-          .data(data) //绑定dataSet
-          .enter() //返回enter部分
-          .append("rect") //数据中每个值，添加p元素
-          .attr("fill", function(d, i) {
-              return color;
-          }) //设置颜色
-          .attr("x", 0) //设置矩形左上角X坐标
-          .attr("y", function(d, i) {
-              return yScale(i) + 18;
-          }) //设置矩形左上角Y坐标
-          .attr("width", function(d) {
-              return xAxisScale(d.HappinessScore); //设置每个条形的宽度
-          })
-          .attr("height", function(d) {
-              return 20; //设置每个条形的高度
-          })
-          .attr("transform", "translate(" + 46 + "," + 0 + ")")
-          .on("mousemove", function(d, i) {
-
-              d3.select(".tooltip").style('display', 'block');
-              d3.select(".tooltip").html('国家名： ' + d.Country + '<br/>' + '幸福分数为' + d.HappinessScore);
-
-              d3.select(this).attr('fill', 'rgba(255,99,71)');
-              d3.select(".tooltip").style("left", (d3.event.pageX) + "px")
-                  .style("top", (d3.event.pageY) + "px")
-          })
-          .on("mouseout", function(d, i) {
-              d3.select(this).attr('fill', color);
-              d3.select(".tooltip").style('display', 'none');
-          });
-  }
+  
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //画区域信息
   function drawRegionBar(keyAttr) {
@@ -717,6 +617,9 @@
               data.push(new Region(country));
           }
       }
+      data.sort(function(val1, val2) {
+          return val2.value - val1.value;
+      });
       var width = 350;
       var height = 350;
       var xAxisScale = d3.scaleBand()

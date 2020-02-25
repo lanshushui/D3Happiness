@@ -139,7 +139,8 @@
             });
             this._selectDropup();
             console.log(this.parentEle.className);
-            if(this.parentEle.className=="scatter-select")drawScatterChart(this.defaultValue);
+            if(this.parentEle.className=="scatter-select scatter-select-1")changScatterSelect(1,this.defaultValue);
+            if(this.parentEle.className=="scatter-select scatter-select-2")changScatterSelect(2,this.defaultValue);
             if(this.parentEle.className=="box-region-bar-select")drawRegionBar(this.defaultValue);
         },
 

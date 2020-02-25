@@ -16,6 +16,8 @@
   var selectCountry = "China";
   var isPressCtrl = false;
   var selectCountries = [];
+  var scatterSelect1 = 1;
+  var scatterSelect2 = 0;
   setKeyEventListener();
   loadData();
   initYearConsole();
@@ -84,13 +86,27 @@
       return csv2015 != null && csv2016 != null && csv2017 != null && csv2018 != null && mapjson != null;
   }
 
+  function changScatterSelect(key, value) {
+    //key为-1时，重新刷新界面
+      if (key == 1) {
+          scatterSelect1 = value;
+      } else if(key==2) {
+          scatterSelect2 = value;
+      }
+      if (scatterSelect1 == 0 || scatterSelect2 == 0) {
+          drawScatterChart();
+      } else {
+          draw3DScatterChart();
+      }
+  }
+
   function start() {
       drawMap();
       initCountryRank();
       drawCountryRadar();
       drawLineChart();
       drawRegionBar(0);
-      drawScatterChart(0);
+      drawScatterChart();
   }
   //年份控制逻辑函数
   function changYear() {
@@ -98,18 +114,20 @@
       initCountryRank();
       drawCountryRadar();
       drawRegionBar(0);
-      drawScatterChart(0);
-      $(".scatter-select .select-selected-value").text("健康分数-幸福分数");
+      scatterSelect1=1;scatterSelect2=0;
+      drawScatterChart();
+      $(".scatter-select-1 .select-selected-value").text("健康分数-幸福分数");
+      $(".scatter-select-2 .select-selected-value").text("无");
       $(".box-region-bar-select .select-selected-value").text("Happiness Score");
       $(".select-item").attr("class", "select-item");
       $(".select-item:first").attr("class", "select-item select-item-selected");
       d3.select(".bar-chart").remove();
       if ($(".select-year").attr("data-value") == 2018) {
-          $(".box-scatter .select-item[data-value='2']").hide();
-          $(".box-region-bar .select-item[data-value='3']").hide();
+          $(".box-scatter .select-item[data-value='3']").hide();
+          $(".box-region-bar .select-item[data-value='4']").hide();
       } else {
-          $(".box-scatter .select-item[data-value='2']").show();
-          $(".box-region-bar .select-item[data-value='3']").show();
+          $(".box-scatter .select-item[data-value='3']").show();
+          $(".box-region-bar .select-item[data-value='4']").show();
       }
 
   }
@@ -260,7 +278,7 @@
           .attr("r", outterR)
           .style("pointer-events", "none");
 
-      if (pieData.length!= 1){
+      if (pieData.length != 1) {
 
           bg.selectAll("path")
               .data(pieData)
@@ -347,7 +365,9 @@
   /**
   画散点图
   **/
-  function drawScatterChart(value) {
+  function drawScatterChart() {
+      value = scatterSelect1 | scatterSelect2;
+
       function keys(d) {
           return d.Country;
       }
@@ -389,7 +409,7 @@
                           selectRegions.push(name);
                           d3.select(this).attr("fill", regionColors[name]);
                       }
-                      drawScatterChart(value);
+                      changScatterSelect();
                   });
 
               svg.append("text")
@@ -403,43 +423,44 @@
       }
 
       function getXAttr(country) {
-          if (value == 0) return country.Health;
-          else if (value == 1) return country.Economy;
-          else if (value == 2) return country.Family;
-          else if (value == 3) return country.Freedom;
-          else if (value == 4) return country.Trust;
-          else if (value == 5) return country.Generosity;
+          if (value == 1) return country.Health;
+          else if (value == 2) return country.Economy;
+          else if (value == 3) return country.Family;
+          else if (value == 4) return country.Freedom;
+          else if (value == 5) return country.Trust;
+          else if (value == 6) return country.Generosity;
       }
 
       function getXTitle() {
-          if (value == 0) return "健康分数";
-          else if (value == 1) return "人均GDP分数";
-          else if (value == 2) return "家庭满足分数";
-          else if (value == 3) return "自由分数";
-          else if (value == 4) return "腐败感知分数";
-          else if (value == 5) return "慷慨分数";
+          if (value == 1) return "健康分数";
+          else if (value == 2) return "人均GDP分数";
+          else if (value == 3) return "家庭满足分数";
+          else if (value == 4) return "自由分数";
+          else if (value == 5) return "腐败感知分数";
+          else if (value == 6) return "慷慨分数";
       }
       drawColorTip();
       var width = 600;
       var height = 400;
       var data = yearData.filter(function(value, key) { return selectRegions.indexOf(value.Region) != -1 });
-
+      if (value == 0) data = [];
 
       var scatterWrapper = d3.select(".svg-scatterWrapper");
 
       var svg;
       var circlesWrapper;
-      if ($(".svg-scatterWrapper svg").length != 0) {
+      if ($(".svg-scatterWrapper .svg-2Dscatter").length != 0) {
           svg = scatterWrapper.select("svg");
           circlesWrapper = svg.select(".circlesWrapper");
 
           svg.select(".axis").remove();
           svg.select(".xTitle").remove();
       } else {
+          scatterWrapper.select("svg").remove();
           svg = scatterWrapper.append("svg")
               .attr("width", width)
               .attr("height", height + 40)
-              .attr("class", "svg-scatter");
+              .attr("class", "svg-2Dscatter");
           circlesWrapper = svg.append("g").attr("class", "circlesWrapper");
 
       }
@@ -555,8 +576,215 @@
           }).remove();
 
   }
+  //画3D散点图
+  function draw3DScatterChart() {
+      function key(d) {
+          return d.id;
+      };
+
+      function processData(data, tt) {
+          /* ----------- GRID ----------- */
+          if ($(".svg-scatterWrapper grid").length == 0) {
+              var xGrid = svg.selectAll('path.grid').data(data[0], key);
+
+              xGrid
+                  .enter()
+                  .append('path')
+                  .attr('class', '_3d grid')
+                  .merge(xGrid)
+                  .attr('stroke', 'black')
+                  .attr('stroke-width', 0.3)
+                  .attr('fill', function(d) { return d.ccw ? 'lightgrey' : '#717171'; })
+                  .attr('fill-opacity', 0.9)
+                  .attr('d', grid3d.draw);
+
+              xGrid.exit().remove();
+          }
+          /* ----------- POINTS ----------- */
+          var points = svg.selectAll('circle').data(data[1], key);
+
+          points
+              .enter()
+              .append('circle')
+              .attr('class', '_3d')
+              .attr('opacity', 0)
+              .merge(points)
+              .transition().duration(tt)
+              .ease(d3.easeLinear)
+              .attr('r', 3)
+              .attr('fill', function(d) { return regionColors[d.belong]; })
+              .attr('opacity', 1)
+              .attr('cx', posPointX)
+              .attr('cy', posPointY);
+
+
+          points.exit()
+              .transition()
+              .duration(500)
+              .ease(d3.easeLinear)
+              .attr("cx", function(d) {
+                  return 0;
+              })
+              .style("opacity", 0)
+              .attr("cy", function(d) {
+                  return 0;
+              }).remove();
+
+          /* ----------- y-Scale ----------- */
+          if ($(".svg-scatterWrapper yScale").length == 0) {
+              var yScale = svg.selectAll('path.yScale').data(data[2]);
+
+              yScale
+                  .enter()
+                  .append('path')
+                  .attr('class', '_3d yScale')
+                  .merge(yScale)
+                  .attr('stroke', 'white')
+                  .attr('stroke-width', .5)
+                  .attr('d', yScale3d.draw);
+
+              yScale.exit().remove();
+
+              /* ----------- y-Scale Text ----------- */
+
+              var yText = svg.selectAll('text.yText').data(data[2][0]);
+
+              yText
+                  .enter()
+                  .append('text')
+                  .attr('class', '_3d yText')
+                  .attr('dx', '.3em')
+                  .merge(yText)
+                  .each(function(d) {
+                      d.centroid = { x: d.rotated.x, y: d.rotated.y, z: d.rotated.z };
+                  })
+                  .attr('x', function(d) { return d.projected.x; })
+                  .attr('y', function(d) { return d.projected.y; })
+                  .text(function(d) { return d[1] <= 0 ? -d[1] : ''; });
+
+              yText.exit().remove();
+          }
+
+          d3.selectAll('._3d').sort(d3._3d().sort);
+      }
+
+      function posPointX(d) {
+          return d.projected.x;
+      }
+
+      function posPointY(d) {
+          return d.projected.y;
+      }
+
+      function dragStart() {
+          mx = d3.event.x;
+          my = d3.event.y;
+      }
+
+      function dragged() {
+          mouseX = mouseX || 0;
+          mouseY = mouseY || 0;
+          beta = (d3.event.x - mx + mouseX) * Math.PI / 230;
+          alpha = (d3.event.y - my + mouseY) * Math.PI / 230 * (-1);
+          var data = [
+              grid3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(xGrid),
+              point3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(scatter),
+              yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([yLine]),
+          ];
+          processData(data, 0);
+      }
+
+      function dragEnd() {
+          mouseX = d3.event.x - mx + mouseX;
+          mouseY = d3.event.y - my + mouseY;
+      }
+
+      function getAttr(country, value) {
+          if (value == 1) return country.Health;
+          else if (value == 2) return country.Economy;
+          else if (value == 3) return country.Family;
+          else if (value == 4) return country.Freedom;
+          else if (value == 5) return country.Trust;
+          else if (value == 6) return country.Generosity;
+      }
+
+      var data = yearData.filter(function(value, key) { return selectRegions.indexOf(value.Region) != -1 });
+      var origin = [350, 240],
+          scale = 20,
+          scatter = [],
+          yLine = [],
+          xGrid = [],
+          beta = 0,
+          alpha = 0,
+          startAngle = Math.PI / 4;
+      var scatterWrapper = d3.select(".svg-scatterWrapper");
+      var svg;
+      if ($(".svg-scatterWrapper .svg-3Dscatter").length == 0) {
+          scatterWrapper.select("svg").remove();
+          svg = scatterWrapper.append("svg")
+              .attr("class", "svg-3Dscatter")
+              .attr("width", 650)
+              .attr("height", 460);
+          svg.call(d3.drag().on('drag', dragged).on('start', dragStart).on('end', dragEnd));
+          svg.append("g");
+      } else {
+          svg = scatterWrapper.select(".svg-3Dscatter");
+      }
+      svg = svg.select('g');
+      var mx, my, mouseX, mouseY;
+
+      var grid3d = d3._3d()
+          .shape('GRID', 20)
+          .origin(origin)
+          .rotateY(startAngle)
+          .rotateX(-startAngle)
+          .scale(scale);
+
+      var point3d = d3._3d()
+          .x(function(d) { return d.x; })
+          .y(function(d) { return d.y; })
+          .z(function(d) { return d.z; })
+          .origin(origin)
+          .rotateY(startAngle)
+          .rotateX(-startAngle)
+          .scale(scale);
+
+      var yScale3d = d3._3d()
+          .shape('LINE_STRIP')
+          .origin(origin)
+          .rotateY(startAngle)
+          .rotateX(-startAngle)
+          .scale(scale);
+
+      var cnt = 0;
+      xGrid = [], scatter = [], yLine = [];
+
+      for (let x = -10; x < 10; x++) {
+          for (let z = -10; z < 10; z++) {
+              xGrid.push([x, 1, z]);
+          }
+      }
+      var xMax = parseInt(d3.max(data, function(d) { return parseFloat(getAttr(d, scatterSelect1)); }) + 1);
+      var xScale = 20 / xMax;
+      var zMax = parseInt(d3.max(data, function(d) { return parseFloat(getAttr(d, scatterSelect2)); }) + 1);
+      var zScale = 20 / zMax;
+      for (let i = 0; i < data.length; i++) {
+          let d = data[i];
+          let x = parseFloat(getAttr(d, scatterSelect1));
+          let z = parseFloat(getAttr(d, scatterSelect2));
+          scatter.push({ x: -10 + xScale * x, y: -d.HappinessScore, z: -10 + zScale * z, id: d.Country, belong: d.Region });
+      }
+      d3.range(-1, 11, 1).forEach(function(d) { yLine.push([-10, -d, -10]); });
+      var data = [
+          grid3d(xGrid),
+          point3d(scatter),
+          yScale3d([yLine])
+      ];
+      processData(data, 1000);
+
+  }
   //////////////////////////////////////////////////////////////////////////////////////////////////
-  
+
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //画区域信息
   function drawRegionBar(keyAttr) {

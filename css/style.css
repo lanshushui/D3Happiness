@@ -131,10 +131,16 @@
     text-align: center;
     letter-spacing: 2px;
 }
-.svg-scatter text,.svg-scatter path{
+.svg-2Dscatter text,.svg-2Dscatter path{
     stroke: white;
 }
-.svg-scatter line{
+.svg-2Dscatter line{
+    stroke: white;
+}
+.svg-3Dscatter text,.svg-3Dscatter path{
+    stroke: white;
+}
+.svg-3Dscatter line{
     stroke: white;
 }
 /* 右边CSS*/

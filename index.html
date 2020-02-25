@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <dvi class="container">
+    <div class="container">
         <div class="box-left">
             <!-- 左边区域-->
             <div class="box-china">
@@ -17,7 +17,6 @@
                 <div class="title">China Happiness Rank</div>
                 <p></p>
             </div>
-
             <div class="countries-color-tip" style="display: inline-block; margin-left: 40px"></div>
             <div class="box-radar">
                 <!-- 中国雷达区域-->
@@ -42,58 +41,76 @@
                 <p class="color-tip">1-10分的幸福分数</p>
             </div>
             <div class="box-scatter" style="margin-top: 30px;">
-                <div class="scatter-select"  style="margin-left: 20px;margin-top: 2px; display: inline-block;
-                vertical-align:middle=;" ></div>
+                <div style="display: inline-block;">
+                    <div class="scatter-select scatter-select-1" style="margin-left: 20px; 
+                "></div>
+                    <div class="scatter-select scatter-select-2" style="margin-left: 20px;margin-top: 10px; 
+                "></div>
+                </div>
                 <!-- 散点图区域-->
-                <div class="color-tip" style="display: inline-block; float: right ;vertical-align:middle;"></div>
+                <div class="color-tip" style="display: inline-block; float: right ;vertical-align:middle; margin-top: 20px"></div>
                 <div class="svg-scatterWrapper"></div>
             </div>
         </div>
         <div class="box-right">
             <!-- 右边区域-->
             <div class="box-consloe">
-            	<div class="title">Year Consloe</div>
-            	<ul class="year-list">
-            		<li ><span class="year select-year" data-value="2015">2015年</span></li>
-            		<li ><span class="year" data-value="2016">2016年</span></li>
-            		<li ><span class="year" data-value="2017">2017年</span></li>
-            		<li ><span class="year" data-value="2018">2018年</span></li>
-            	</ul>
+                <div class="title">Year Consloe</div>
+                <ul class="year-list">
+                    <li><span class="year select-year" data-value="2015">2015年</span></li>
+                    <li><span class="year" data-value="2016">2016年</span></li>
+                    <li><span class="year" data-value="2017">2017年</span></li>
+                    <li><span class="year" data-value="2018">2018年</span></li>
+                </ul>
             </div>
             <div class="box-region-bar">
                 <!-- 中国幸福数据曲线区域-->
-                
-                  <div class="box-region-bar-select" style="margin-left: 25px"></div>
+                <div class="box-region-bar-select" style="margin-left: 25px"></div>
                 <div class="reigon-bar-div"></div>
             </div>
             <div class="box-pie">
                 <!-- 中国幸福数据曲线区域-->
                 <div class="title">Happiness Score of Countries</div>
-               
             </div>
         </div>
         <div class="tooltip">
         </div>
-        </div>
+    </div>
+    
         <script type="text/javascript" src="js/d3.js"></script>
         <script type="text/javascript" src="js/jquery-3.4.1.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
         <script type="text/javascript" src="js/dropdown.js"></script>
+        <script type="text/javascript" src="js/d3-3d.min.js"></script>
         <script>
         document.addEventListener("DOMContentLoaded", function() {
             const select1 = new $Selector({
-                eleSelector: ".scatter-select",
+                eleSelector: ".scatter-select-1",
                 options: [
-                    { name: "健康分数-幸福分数", value: "0" },
-                    { name: "人均GDP分数-幸福分数", value: "1" },
-                    { name: "家庭满足分数-幸福分数", value: "2" },
-                    { name: "自由分数-幸福分数", value: "3" },
-                    { name: "腐败感知分数-幸福分数", value: "4" },
-                    { name: "慷慨分数-幸福分数", value: "5" },
+                    { name: "无", value: "0" },
+                    { name: "健康分数-幸福分数", value: "1" },
+                    { name: "人均GDP分数-幸福分数", value: "2" },
+                    { name: "家庭满足分数-幸福分数", value: "3" },
+                    { name: "自由分数-幸福分数", value: "4" },
+                    { name: "腐败感知分数-幸福分数", value: "5" },
+                    { name: "慷慨分数-幸福分数", value: "6" },
                 ],
                 defaultText: "健康分数-幸福分数"
             });
             const select2 = new $Selector({
+                eleSelector: ".scatter-select-2",
+                options: [
+                    { name: "无", value: "0" },
+                    { name: "健康分数-幸福分数", value: "1" },
+                    { name: "人均GDP分数-幸福分数", value: "2" },
+                    { name: "家庭满足分数-幸福分数", value: "3" },
+                    { name: "自由分数-幸福分数", value: "4" },
+                    { name: "腐败感知分数-幸福分数", value: "5" },
+                    { name: "慷慨分数-幸福分数", value: "6" },
+                ],
+                defaultText: "无"
+            });
+            const select3 = new $Selector({
                 eleSelector: ".box-region-bar-select",
                 options: [
                     { name: "Happiness Score", value: "0" },
@@ -105,7 +122,7 @@
                     { name: "Generosity", value: "6" },
                 ],
                 defaultText: "Happiness Score"
-            });            
+            });
         })
         </script>
 </body>

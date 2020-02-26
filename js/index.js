@@ -87,10 +87,10 @@
   }
 
   function changScatterSelect(key, value) {
-    //key为-1时，重新刷新界面
+      //key为-1时，重新刷新界面
       if (key == 1) {
           scatterSelect1 = value;
-      } else if(key==2) {
+      } else if (key == 2) {
           scatterSelect2 = value;
       }
       if (scatterSelect1 == 0 || scatterSelect2 == 0) {
@@ -114,7 +114,8 @@
       initCountryRank();
       drawCountryRadar();
       drawRegionBar(0);
-      scatterSelect1=1;scatterSelect2=0;
+      scatterSelect1 = 1;
+      scatterSelect2 = 0;
       drawScatterChart();
       $(".scatter-select-1 .select-selected-value").text("健康分数-幸福分数");
       $(".scatter-select-2 .select-selected-value").text("无");
@@ -595,7 +596,7 @@
                   .attr('stroke', 'black')
                   .attr('stroke-width', 0.3)
                   .attr('fill', function(d) { return d.ccw ? 'lightgrey' : '#717171'; })
-                  .attr('fill-opacity', 0.9)
+                  .attr('fill-opacity', 0.3)
                   .attr('d', grid3d.draw);
 
               xGrid.exit().remove();
@@ -609,6 +610,19 @@
               .attr('class', '_3d')
               .attr('opacity', 0)
               .merge(points)
+              .on("mousemove", function(d, i) {
+
+                  d3.select(".tooltip").style('display', 'block');
+                  d3.select(".tooltip").html('国家名： ' + d.id + '<br/>' + '幸福分数为' + -d.y);
+
+                  d3.select(this).attr('fill', 'rgba(255,99,71)');
+                  d3.select(".tooltip").style("left", (d3.event.pageX) + "px")
+                      .style("top", (d3.event.pageY) + "px")
+              })
+              .on("mouseout", function(d, i) {
+                  d3.select(this).attr('fill', regionColors[d.belong]);
+                  d3.select(".tooltip").style('display', 'none');
+              })
               .transition().duration(tt)
               .ease(d3.easeLinear)
               .attr('r', 3)
